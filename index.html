@@ -1,0 +1,553 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Monstro Bolso</title>
+<style>
+:root{--bg:#e8efe0;--fg:#1c2a1c;--card:#f6f9f0;--ac:#2f6f4f;--bf:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10160f;--fg:#dfead6;--card:#1b2619;--ac:#6fc296;--bf:#10160f}}
+:root[data-theme="dark"]{--bg:#10160f;--fg:#dfead6;--card:#1b2619;--ac:#6fc296;--bf:#10160f}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
+#app{max-width:480px;margin:0 auto;padding:12px}
+h1{text-align:center;margin:8px 0;font-size:22px}
+.box{background:var(--card);border:3px solid var(--fg);border-radius:10px;padding:10px;margin:8px 0}
+button{font:inherit;font-weight:bold;background:var(--ac);color:var(--bf);border:0;border-radius:8px;padding:9px 12px;margin:3px 3px 3px 0;cursor:pointer;touch-action:manipulation}
+input{font:inherit;padding:8px;border:2px solid var(--fg);border-radius:8px;background:var(--card);color:var(--fg);width:70%;-webkit-user-select:text;user-select:text}
+.sp{width:92px;height:92px;object-fit:contain;background:#fff;border-radius:8px;display:grid;place-items:center;font-size:56px}
+.row{display:flex;gap:10px;align-items:center}.grow{flex:1}
+.bar{height:10px;border:2px solid var(--fg);border-radius:6px;overflow:hidden;background:var(--card)}.bar i{display:block;height:100%;background:#3fbf5f}
+.tg{font-size:11px;border:1px solid var(--fg);border-radius:6px;padding:0 5px;margin-right:3px}
+.card{cursor:pointer}
+#cv{width:100%;aspect-ratio:11/9;border:3px solid var(--fg);border-radius:10px;image-rendering:pixelated;display:block;background:#2a6fc9;touch-action:none}
+#cv.fl{animation:fl .45s}@keyframes fl{0%,50%,100%{filter:none}25%,75%{filter:invert(1)}}
+.dp{display:grid;grid-template-columns:repeat(3,68px);justify-content:center;gap:6px;margin:8px 0}.dp button{height:52px;font-size:22px;margin:0;touch-action:none}
+.arena{position:relative;height:300px;border:3px solid var(--fg);border-radius:10px;overflow:hidden;background:linear-gradient(var(--sky) 0 52%,#6fbf5a 52%);color:#1c2a1c}
+.arena .sp{width:128px;height:128px;font-size:80px}
+.arena .sp.cut{background:transparent;mix-blend-mode:multiply}
+.arena .sp:not(.cut){border-radius:50%;object-fit:cover}
+.fs,.ps{position:absolute}.fs{top:30px;right:14px}.ps{bottom:12px;left:14px}.ps .sp{transform:scaleX(-1)}
+.sh{position:absolute;width:140px;height:26px;border-radius:50%;background:#0003}.sh.a{top:150px;right:8px}.sh.b{bottom:8px;left:8px}
+.bx{position:absolute;background:#f6f9f0;border:3px solid #1c2a1c;border-radius:8px;padding:4px 8px;width:46%;font-size:13px}.bx.fb{top:8px;left:8px}.bx.pb{bottom:8px;right:8px}
+.enter{animation:en .5s}@keyframes en{from{transform:translateX(60px);opacity:0}}
+.shake{animation:sk .35s}@keyframes sk{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.ps.shake{animation:sk2 .35s}@keyframes sk2{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.log{min-height:70px}.mn{display:grid;grid-template-columns:1fr 1fr;gap:6px}.mn button{margin:0}
+</style></head><body><div id="app"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script>
+const IM={};
+const CH={};"Normal||Pedra,Aço|Fantasma;Fogo|Planta,Gelo,Inseto,Aço|Fogo,Água,Pedra,Dragão|;Água|Fogo,Terrestre,Pedra|Água,Planta,Dragão|;Planta|Água,Terrestre,Pedra|Fogo,Planta,Venenoso,Voador,Inseto,Dragão,Aço|;Elétrico|Água,Voador|Elétrico,Planta,Dragão|Terrestre;Gelo|Planta,Terrestre,Voador,Dragão|Fogo,Água,Gelo,Aço|;Lutador|Normal,Gelo,Pedra,Sombrio,Aço|Venenoso,Voador,Psíquico,Inseto,Fada|Fantasma;Venenoso|Planta,Fada|Venenoso,Terrestre,Pedra,Fantasma|Aço;Terrestre|Fogo,Elétrico,Venenoso,Pedra,Aço|Planta,Inseto|Voador;Voador|Planta,Lutador,Inseto|Elétrico,Pedra,Aço|;Psíquico|Lutador,Venenoso|Psíquico,Aço|Sombrio;Inseto|Planta,Psíquico,Sombrio|Fogo,Lutador,Venenoso,Voador,Fantasma,Aço,Fada|;Pedra|Fogo,Gelo,Voador,Inseto|Lutador,Terrestre,Aço|;Fantasma|Psíquico,Fantasma|Sombrio|Normal;Dragão|Dragão|Aço|Fada;Aço|Gelo,Pedra,Fada|Fogo,Água,Elétrico,Aço|;Sombrio|Psíquico,Fantasma|Lutador,Sombrio,Fada|;Fada|Lutador,Dragão,Sombrio|Fogo,Venenoso,Aço|;Som|Gelo,Inseto,Pedra|Aço,Dragão|;Estrela|||".split(";").forEach(s=>{const[a,x,y,z]=s.split("|");CH[a]={s:x?x.split(","):[],w:y?y.split(","):[],i:z?z.split(","):[]}});
+const MV={Normal:"Investida",Fogo:"Lança-Chamas",Água:"Jato d’Água",Planta:"Chicote de Cipó",Elétrico:"Trovão",Gelo:"Raio Gélido",Lutador:"Golpe Marcial",Venenoso:"Ferrão Tóxico",Terrestre:"Terremoto",Voador:"Bico Furador",Psíquico:"Confusão",Inseto:"Picada",Pedra:"Pedrada",Fantasma:"Susto Sombrio",Dragão:"Garra Dracônica",Aço:"Cabeçada de Aço",Sombrio:"Mordida Sombria",Fada:"Brilho Lunar"};
+const SP={
+e1:{n:"Fagulhinha",t:["Elétrico","Fantasma"],b:[40,50,38,70],im:"el1",c:1,evo:[12,"e2"]},e2:{n:"Voltespectro",t:["Elétrico","Fantasma"],b:[60,72,58,88],im:"el2",c:1,evo:[26,"e3"]},e3:{n:"Tempestarion",t:["Elétrico","Fantasma"],b:[85,100,80,105],im:"el3",c:1},
+r1:{n:"Flarook",t:["Fogo","Voador"],b:[42,50,38,72],im:"fb1",evo:[12,"r2"]},r2:{n:"Cindrake",t:["Fogo","Voador"],b:[64,78,60,80],im:"fb2",evo:[26,"r3"]},r3:{n:"Pyrograph",t:["Fogo","Voador"],b:[90,100,84,90],im:"fb3"},
+s1:{n:"Silvano",t:["Planta","Fantasma"],b:[95,85,100,40],im:"sv"},
+cp:{n:"Cap",t:["Normal"],b:[53,52,54,57],e:"🐹"},bo:{n:"Bolin",t:["Normal"],b:[60,52,49,59],e:"⚽"},d1:{n:"Demoninho",t:["Fogo","Sombrio"],b:[54,65,40,57],e:"😈"},a1:{n:"Anjinho",t:["Fada","Voador"],b:[44,60,51,56],e:"😇"},
+n1:{n:"Pivit",t:["Normal","Voador"],b:[45,45,40,50],im:"pv1",evo:[12,"n2"]},n2:{n:"Vitrio",t:["Normal","Voador"],b:[65,68,62,68],im:"pv2",evo:[26,"n3"]},n3:{n:"Bemvalor",t:["Normal","Voador"],b:[88,92,85,82],im:"pv3"}};
+const SPEC=["Fogo","Água","Planta","Elétrico","Psíquico","Gelo","Dragão","Sombrio","Fada","Som","Estrela"];
+const TC={Normal:"#a8a878",Fogo:"#f08030",Água:"#6890f0",Planta:"#78c850",Elétrico:"#f8d030",Gelo:"#98d8d8",Lutador:"#c03028",Venenoso:"#a040a0",Terrestre:"#b8964a",Voador:"#a890f0",Psíquico:"#f85888",Inseto:"#a8b820",Pedra:"#b8a038",Fantasma:"#705898",Dragão:"#7038f8",Aço:"#9aa0b8",Sombrio:"#554848",Fada:"#ee99ac",Som:"#e0689a",Estrela:"#3a3a8a"};
+const TE={Normal:"⭐",Fogo:"🔥",Água:"💧",Planta:"🌿",Elétrico:"⚡",Gelo:"❄️",Lutador:"🥊",Venenoso:"☠️",Terrestre:"⛰️",Voador:"🪽",Psíquico:"🔮",Inseto:"🐛",Pedra:"🪨",Fantasma:"👻",Dragão:"🐉",Aço:"⚙️",Sombrio:"🌑",Fada:"✨",Som:"🎵",Estrela:"🌟"};
+Object.values(SP).forEach(s=>{if(s.b.length==4)s.b=[s.b[0],s.b[1],s.b[2],s.b[1],s.b[2],s.b[3]];s.lm=/2$|1$/.test("")?2:s.lm;s.mv=s.t.map((x,i)=>({n:MV[x],t:x,p:i?55:60,u:1})).concat([{n:"Investida",t:"Normal",p:40,u:1}])});
+["e2","r2","n2","s1"].forEach(k=>SP[k].lm=8);["e1","r1","n1"].forEach(k=>SP[k].lm=2);
+const DXI=[],fx=t=>({Terra:"Terrestre",Veneno:"Venenoso"}[t]||t);
+`d001|Dogof Hell|Fogo|35,55,46,68,63,53,320|Fire Punch:Fogo;Flare Blitz:Fogo;Pyro Ball:Fogo;Blaze Kick:Fogo;Ember:Fogo;Flamethrower:Fogo;Fire Blast:Fogo;Overheat:Fogo
+d002|Wardog|Fogo|64,63,75,83,76,59,420|Fire Punch:Fogo;Flare Blitz:Fogo;Pyro Ball:Fogo;Blaze Kick:Fogo;Ember:Fogo;Flamethrower:Fogo;Fire Blast:Fogo;Overheat:Fogo
+d003|Cerberus|Fogo,Fantasma|88,82,85,97,62,86,500|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Shadow Sneak:Fantasma;Rage Fist:Fantasma;Astonish:Fantasma;Moongeist Beam:Fantasma
+d004|Blue Octopus|Água|54,53,54,59,55,45,320|Aqua Jet:Água;Waterfall:Água;Liquidation:Água;Crabhammer:Água;Water Gun:Água;Surf:Água;Hydro Pump:Água;Muddy Water:Água
+d005|Molusco|Água,Sombrio|74,79,60,75,72,60,420|Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d006|Craken|Água,Dragão|125,130,95,115,90,65,620|Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d007|Little Elephant|Planta|41,58,53,59,62,47,320|Branch Poke:Planta;Seed Bomb:Planta;Horn Leech:Planta;Power Whip:Planta;Absorb:Planta;Giga Drain:Planta;Energy Ball:Planta;Leaf Storm:Planta
+d008|Elephant|Planta,Terra|61,74,84,70,73,58,420|Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta;Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra
+d009|Grande Mamute|Planta,Aço|94,78,109,84,97,78,540|Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d010|Terruga|Terra,Normal|54,57,68,51,45,45,320|Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra;Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal
+d011|Campuga|Terra,Normal|64,79,66,62,67,82,420|Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra;Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal
+d012|Stadiuga|Terra,Normal|130,105,140,55,100,40,570|Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra;Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal
+d013|Raiko|Elétrico|59,47,57,57,44,56,320|Thunder Punch:Elétrico;Wild Charge:Elétrico;Supercell Slam:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Discharge:Elétrico;Thunderbolt:Elétrico;Thunder:Elétrico
+d014|Raineko|Elétrico|65,55,70,86,76,68,420|Thunder Punch:Elétrico;Wild Charge:Elétrico;Supercell Slam:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Discharge:Elétrico;Thunderbolt:Elétrico;Thunder:Elétrico
+d015|Raijū|Elétrico,Fantasma|86,90,79,91,78,116,540|Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico;Shadow Sneak:Fantasma;Rage Fist:Fantasma;Astonish:Fantasma;Moongeist Beam:Fantasma
+d016|Pikachu de Lolse|Elétrico,Fada|55,70,50,85,65,115,440|Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico;Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada
+d017|Amarinho|Dragão,Gelo|52,68,40,71,42,47,320|Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão;Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo
+d018|Amarokryo|Dragão,Gelo|56,87,70,94,56,57,420|Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão;Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo
+d019|Glaciamarok|Dragão,Gelo|87,106,63,109,90,85,540|Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão;Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo
+d020|Bitnoir|Aço,Sombrio|54,54,47,43,60,62,320|Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d021|Noctron|Aço,Sombrio|65,86,72,63,67,67,420|Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d022|Darknex|Aço,Sombrio|83,90,111,79,94,83,540|Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d023|Pianha|Som,Veneno|48,52,50,72,58,70,350|Eco:Som;Nota Estridente:Som;Impacto Sônico:Som;Poison Sting:Veneno;Acid:Veneno;Sludge:Veneno;Golpe de Tambor:Som;Venoshock:Veneno
+d024|Aracnóctave|Som,Veneno|78,78,76,118,88,92,530|Concerto Tóxico:Som;Explosão Sonora:Som;Nota Estridente:Som;Onda de Choque:Som;Sludge Bomb:Veneno;Gunk Shot:Veneno;Venoshock:Veneno;Poison Jab:Veneno
+d025|Tucaninho|Planta,Voador|55,58,52,62,55,78,360|Leafage:Planta;Razor Leaf:Planta;Seed Bomb:Planta;Peck:Voador;Wing Attack:Voador;Air Cutter:Voador;Aerial Ace:Voador;Magical Leaf:Planta
+d026|Tucanópole|Planta,Voador|100,105,88,92,90,105,580|Bico de Sequoia:Planta;Leaf Blade:Planta;Seed Bomb:Planta;Energy Ball:Planta;Brave Bird:Voador;Air Slash:Voador;Hurricane:Voador;Aerial Ace:Voador
+d027|Tree|Planta,Fantasma|69,84,91,81,73,102,500|Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta;Shadow Sneak:Fantasma;Rage Fist:Fantasma;Astonish:Fantasma;Moongeist Beam:Fantasma
+d027c|Tree (Celestial)|Fada,Fantasma|70,60,70,95,90,65,450|Moonblast:Fada;Dazzling Gleam:Fada;Shadow Ball:Fantasma;Hex:Fantasma;Magical Leaf:Planta;Phantom Force:Fantasma;Play Rough:Fada;Energy Ball:Planta
+d027i|Tree (Infernal)|Fogo,Fantasma|70,75,65,100,75,65,450|Flamethrower:Fogo;Fire Blast:Fogo;Shadow Ball:Fantasma;Hex:Fantasma;Flame Charge:Fogo;Phantom Force:Fantasma;Fire Punch:Fogo;Shadow Claw:Fantasma
+d028|Grande Arácnido|Inseto,Veneno|37,71,64,53,53,42,320|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d029|Spider|Inseto,Veneno|69,71,64,62,81,73,420|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d030|Tarântula|Inseto,Veneno|71,102,87,85,103,92,540|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d031|Peão|Normal,Aço|48,43,62,53,62,52,320|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d032|Bispo|Normal,Aço|82,68,72,70,58,70,420|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d033|King|Normal,Aço|110,95,145,55,145,60,610|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d034|Queen|Normal,Aço|95,130,90,117,80,95,607|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d035|Cap|Normal|53,54,54,49,53,57,320|Quick Attack:Normal;Body Slam:Normal;Extreme Speed:Normal;Double-Edge:Normal;Swift:Normal;Hyper Voice:Normal;Tri Attack:Normal;Boomburst:Normal
+d036|Capking|Normal,Água|99,69,89,96,87,100,540|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água
+d037|Capqueen|Normal,Água|76,100,81,86,101,96,540|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água
+d038|Ventilápia|Água,Aço|39,50,51,59,70,51,320|Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d039|Ventuba|Água,Aço|69,70,74,66,71,70,420|Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d040|Viento de los Mares|Água,Aço|77,90,109,89,85,90,540|Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d041|Uva|Planta,Veneno|42,61,70,44,56,47,320|Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d042|Vinho|Planta,Veneno|48,70,77,62,82,81,420|Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d043|Snorlax|Normal|160,110,65,65,110,30,540|Body Slam:Normal;Hyper Voice:Normal;Crunch:Sombrio;Heavy Slam:Aço;Earthquake:Terra;Ice Punch:Gelo;Fire Punch:Fogo;Thunder Punch:Elétrico
+d043c|Snorlax (Celestial)|Normal,Fada|160,100,70,75,120,35,560|Body Slam:Normal;Hyper Voice:Normal;Play Rough:Fada;Moonblast:Fada;Dazzling Gleam:Fada;Metronome:Normal;Rest:Psíquico;Snore:Normal
+d043i|Snorlax (Infernal)|Normal,Sombrio|160,120,70,55,100,35,540|Body Slam:Normal;Crunch:Sombrio;Dark Pulse:Sombrio;Foul Play:Sombrio;Hyper Voice:Normal;Heavy Slam:Aço;Earthquake:Terra;Rest:Psíquico
+d044|Snorlost|Fantasma|87,76,90,100,90,97,540|Shadow Sneak:Fantasma;Shadow Claw:Fantasma;Poltergeist:Fantasma;Rage Fist:Fantasma;Astonish:Fantasma;Hex:Fantasma;Shadow Ball:Fantasma;Moongeist Beam:Fantasma
+d045|Magikarp|Água|20,10,55,15,20,80,200|Splash:Normal;Tackle:Normal;Flail:Normal;Hydro Pump:Água
+d045c|Magikarp (Celestial)|Fada|20,15,50,25,30,90,230|Splash:Normal;Tackle:Normal;Disarming Voice:Fada;Dazzling Gleam:Fada
+d045i|Magikarp (Infernal)|Fogo|20,20,50,25,20,85,220|Splash:Normal;Tackle:Normal;Ember:Fogo;Flame Charge:Fogo
+d046|Gyarados|Água,Voador|95,125,79,60,100,81,540|Aqua Tail:Água;Hydro Pump:Água;Waterfall:Água;Hurricane:Voador;Crunch:Sombrio;Ice Fang:Gelo;Dragon Dance:Dragão;Hyper Beam:Normal
+d046c|Gyarados (Celestial)|Fada,Dragão|95,115,79,90,105,86,570|Moonblast:Fada;Play Rough:Fada;Dragon Pulse:Dragão;Dragon Claw:Dragão;Draco Meteor:Dragão;Dazzling Gleam:Fada;Hyper Beam:Normal;Hurricane:Voador
+d046i|Gyarados (Infernal)|Fogo,Sombrio|95,130,79,70,90,86,550|Flamethrower:Fogo;Fire Blast:Fogo;Crunch:Sombrio;Dark Pulse:Sombrio;Fire Fang:Fogo;Foul Play:Sombrio;Hyper Beam:Normal;Hurricane:Voador
+d047|Serapheon|Fada,Dragão|81,105,87,104,88,75,540|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d048|Infernion|Fogo,Sombrio|81,100,90,103,75,91,540|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d049|Demoninho|Fogo,Sombrio|54,75,36,54,44,57,320|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d050|Anjo Caído|Fada,Sombrio|60,73,61,80,82,64,420|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d051|Demônio|Fogo,Sombrio|88,95,82,100,83,92,540|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d052|Lorde Demônio|Fogo,Sombrio|125,145,110,130,105,105,720|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d053|Anjinho|Fada,Voador|44,61,50,58,51,56,320|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador
+d054|Anjo|Fada,Voador|61,75,67,59,77,81,420|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador
+d055|Anjo Superior|Fada,Voador|88,86,74,72,91,89,500|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador
+d056|Arcanjo|Fada,Voador|115,120,105,145,125,110,720|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador
+d057|Pokémon da Maldição|Veneno,Terra|120,125,120,95,110,80,650|Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno;Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra
+d058|Potato|Psíquico,Estrela|120,105,105,150,130,140,750|Psycho Cut:Psíquico;Psyblade:Psíquico;Confusion:Psíquico;Future Sight:Psíquico
+d059|Legacy|Fada|115,120,105,130,120,125,715|Play Rough:Fada;Spirit Break:Fada;Magical Torque:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Draining Kiss:Fada;Dazzling Gleam:Fada;Moonblast:Fada
+d060|Hack|Aço,Elétrico|105,125,115,145,110,120,720|Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço;Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico
+d061|Byte|Elétrico,Aço|52,37,63,58,51,59,320|Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico;Metal Claw:Aço;Double Iron Bash:Aço;Mirror Shot:Aço;Make It Rain:Aço
+d062|Bolin|Normal|60,48,45,55,53,59,320|Quick Attack:Normal;Body Slam:Normal;Extreme Speed:Normal;Double-Edge:Normal;Swift:Normal;Hyper Voice:Normal;Tri Attack:Normal;Boomburst:Normal
+d063|Librum|Planta,Psíquico|90,84,70,82,92,82,500|Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta;Psycho Cut:Psíquico;Psyblade:Psíquico;Confusion:Psíquico;Future Sight:Psíquico
+d064|Espectrita|Pedra,Fantasma|93,86,86,92,62,81,500|Rock Throw:Pedra;Head Smash:Pedra;Ancient Power:Pedra;Judgment:Pedra;Shadow Sneak:Fantasma;Rage Fist:Fantasma;Astonish:Fantasma;Moongeist Beam:Fantasma
+d065|Fagulim|Fogo,Fada|44,47,53,66,67,43,320|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada
+d066|Luminfada|Fogo,Fada|52,74,70,72,85,67,420|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada
+d067|Pokémon das Almas|Fantasma,Lutador|120,135,115,100,115,105,690|Shadow Sneak:Fantasma;Rage Fist:Fantasma;Astonish:Fantasma;Moongeist Beam:Fantasma;Mach Punch:Lutador;Superpower:Lutador;Vacuum Wave:Lutador;Secret Sword:Lutador
+d068|Pokémon dos Elementos|Normal,Psíquico|110,100,105,145,125,115,700|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Psycho Cut:Psíquico;Psyblade:Psíquico;Confusion:Psíquico;Future Sight:Psíquico
+d069|Porta|Planta,Psíquico|61,84,85,95,92,83,500|Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta;Psycho Cut:Psíquico;Psyblade:Psíquico;Confusion:Psíquico;Future Sight:Psíquico
+d070|Nevito|Normal,Gelo|63,54,38,61,47,57,320|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo
+d071|Nevurso|Normal,Gelo|74,69,64,71,64,78,420|Quick Attack:Normal;Double-Edge:Normal;Swift:Normal;Boomburst:Normal;Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo
+d072|Gnomim|Fada,Terra|44,65,62,36,59,54,320|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra
+d073|Gnomonte|Fada,Terra|63,79,73,89,78,38,420|Play Rough:Fada;Mighty Cleave:Fada;Fairy Wind:Fada;Moonblast:Fada;Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra
+d074|Libelito|Inseto,Dragão|45,69,41,63,42,60,320|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d075|Dracélula|Inseto,Dragão|76,74,73,73,53,71,420|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d076|Libeldraco|Inseto,Dragão|90,109,90,75,78,98,540|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d077|Toxice|Gelo,Veneno|48,57,66,37,59,53,320|Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d078|Criotox|Gelo,Veneno|58,82,75,69,75,61,420|Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d079|Faísca|Elétrico,Fogo|48,45,53,74,43,57,320|Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico;Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo
+d080|Voltaico|Elétrico,Fogo|63,68,62,86,59,82,420|Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico;Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo
+d081|Garra|Lutador,Inseto|89,93,72,74,73,99,500|Mach Punch:Lutador;Superpower:Lutador;Vacuum Wave:Lutador;Secret Sword:Lutador;Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto
+d082|Gigavert|Lutador,Voador|86,101,76,86,69,82,500|Mach Punch:Lutador;Superpower:Lutador;Vacuum Wave:Lutador;Secret Sword:Lutador;Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador
+d083|Bouldrush|Lutador,Pedra|80,97,96,76,80,71,500|Mach Punch:Lutador;Superpower:Lutador;Vacuum Wave:Lutador;Secret Sword:Lutador;Rock Throw:Pedra;Head Smash:Pedra;Ancient Power:Pedra;Judgment:Pedra
+d084|Toxikung|Lutador,Veneno|80,92,80,71,89,88,500|Mach Punch:Lutador;Superpower:Lutador;Vacuum Wave:Lutador;Secret Sword:Lutador;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d085|Terrafausto|Lutador,Terra|93,92,98,70,72,75,500|Mach Punch:Lutador;Superpower:Lutador;Vacuum Wave:Lutador;Secret Sword:Lutador;Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra
+d086|Aeroarach|Inseto,Voador|77,104,81,77,70,91,500|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador
+d087|Lithobug|Inseto,Pedra|77,99,83,83,62,96,500|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Rock Throw:Pedra;Head Smash:Pedra;Ancient Power:Pedra;Judgment:Pedra
+d088|Mantispor|Inseto,Planta|90,96,82,70,81,81,500|Fury Cutter:Inseto;Megahorn:Inseto;Struggle Bug:Inseto;Silver Wind:Inseto;Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta
+d089|Zéfiro|Voador,Dragão|75,90,83,92,76,84,500|Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d090|Vultumbra|Voador,Sombrio|90,85,72,87,73,93,500|Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador;Bite:Sombrio;Kowtow Cleave:Sombrio;Snarl:Sombrio;Fiery Wrath:Sombrio
+d091|Stratobird|Voador,Elétrico|61,91,77,92,73,106,500|Peck:Voador;Brave Bird:Voador;Gust:Voador;Hurricane:Voador;Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico
+d092|Gárgula|Pedra,Veneno|72,87,97,85,89,70,500|Rock Throw:Pedra;Head Smash:Pedra;Ancient Power:Pedra;Judgment:Pedra;Poison Fang:Veneno;Dire Claw:Veneno;Acid:Veneno;Sludge Wave:Veneno
+d093|Geofrost|Pedra,Gelo|86,106,76,88,83,61,500|Rock Throw:Pedra;Head Smash:Pedra;Ancient Power:Pedra;Judgment:Pedra;Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo
+d094|Psilagoa|Psíquico,Água|84,57,75,95,96,93,500|Psycho Cut:Psíquico;Psyblade:Psíquico;Confusion:Psíquico;Future Sight:Psíquico;Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água
+d095|Mystiwind|Psíquico,Água|81,76,61,105,108,69,500|Psycho Cut:Psíquico;Psyblade:Psíquico;Confusion:Psíquico;Future Sight:Psíquico;Aqua Jet:Água;Crabhammer:Água;Water Gun:Água;Muddy Water:Água
+d096|Electraflora|Elétrico,Planta|82,79,81,95,60,103,500|Thunder Punch:Elétrico;Bolt Strike:Elétrico;Thunder Shock:Elétrico;Thunder:Elétrico;Branch Poke:Planta;Power Whip:Planta;Absorb:Planta;Leaf Storm:Planta
+d097|Criocaverna|Gelo,Terra|90,97,74,87,68,84,500|Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo;Mud-Slap:Terra;Earthquake:Terra;Mud Shot:Terra;Sandsear Storm:Terra
+d098|Pedrino|Pedra|54,70,52,43,55,46,320|Rock Throw:Pedra;Rock Slide:Pedra;Stone Edge:Pedra;Head Smash:Pedra;Ancient Power:Pedra;Power Gem:Pedra;Meteor Beam:Pedra;Judgment:Pedra
+d099|Casulito|Pedra|75,72,95,62,65,51,420|Rock Throw:Pedra;Rock Slide:Pedra;Stone Edge:Pedra;Head Smash:Pedra;Ancient Power:Pedra;Power Gem:Pedra;Meteor Beam:Pedra;Judgment:Pedra
+d100|Magmadraco|Fogo,Dragão|100,130,95,120,85,90,620|Fire Punch:Fogo;Blaze Kick:Fogo;Ember:Fogo;Overheat:Fogo;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d101|Glacidraca|Gelo,Dragão|105,95,110,125,105,80,620|Ice Shard:Gelo;Mountain Gale:Gelo;Powder Snow:Gelo;Blizzard:Gelo;Dragon Tail:Dragão;Outrage:Dragão;Twister:Dragão;Roar of Time:Dragão
+d102|Psyduck|Água|50,52,48,65,50,55,320|Water Gun:Água;Water Pulse:Água;Aqua Tail:Água;Confusion:Psíquico;Zen Headbutt:Psíquico;Surf:Água;Hydro Pump:Água;Psychic:Psíquico
+d103|Psydip|Água,Psíquico|80,72,74,110,85,84,505|Water Pulse:Água;Surf:Água;Hydro Pump:Água;Zen Headbutt:Psíquico;Psychic:Psíquico;Psyshock:Psíquico;Aqua Tail:Água;Confusion:Psíquico
+d104|Monwalk|Som|75,92,68,96,72,122,525|Moonwalk:Som;Impacto Sônico:Som;Golpe de Tambor:Som;Investida Harmônica:Som;Eco:Som;Nota Estridente:Som;Explosão Sonora:Som;Quick Attack:Normal
+d105|Soneon|Som|75,65,70,110,95,110,525|Eco:Som;Nota Estridente:Som;Explosão Sonora:Som;Investida Harmônica:Som;Hyper Voice:Normal;Quick Attack:Normal;Swift:Normal;Onda de Choque:Som
+d106|Sonorus|Som,Dragão|110,110,100,145,115,100,680|Explosão Sonora:Som;Onda de Choque:Som;Nota Estridente:Som;Dragon Pulse:Dragão;Dragon Claw:Dragão;Draco Meteor:Dragão;Investida Harmônica:Som;Hyper Voice:Normal
+d107|Bardim|Som|52,48,50,68,62,60,340|Eco:Som;Impacto Sônico:Som;Nota Estridente:Som;Golpe de Tambor:Som;Swift:Normal;Quick Attack:Normal;Round:Normal;Disarming Voice:Fada
+d108|Menestrel|Som,Fada|70,62,66,92,86,74,450|Eco:Som;Nota Estridente:Som;Explosão Sonora:Som;Investida Harmônica:Som;Disarming Voice:Fada;Dazzling Gleam:Fada;Play Rough:Fada;Moonblast:Fada
+d109|Virtuoso|Som,Fada|88,78,80,125,110,89,570|Explosão Sonora:Som;Onda de Choque:Som;Investida Harmônica:Som;Nota Estridente:Som;Moonblast:Fada;Play Rough:Fada;Dazzling Gleam:Fada;Concerto Tóxico:Som
+d110|Lendário Liminar|Sombrio,Fantasma|105,115,95,135,115,105,670|Shadow Ball:Fantasma;Shadow Claw:Fantasma;Phantom Force:Fantasma;Dark Pulse:Sombrio;Crunch:Sombrio;Night Slash:Sombrio;Hex:Fantasma;Foul Play:Sombrio`.trim().split("\n").forEach(l=>{const[id,n,t,b,m]=l.split("|"),bs=b.split(",").map(Number),raw=m.split(";").map(x=>{const[a,c]=x.split(":");return{n:a,t:fx(c)}}),cnt={},idx={};
+raw.forEach(v=>{cnt[v.t]=(cnt[v.t]||0)+1});raw.forEach(v=>{const r=idx[v.t]=idx[v.t]||0,c=cnt[v.t],f=c>1?r/(c-1):0;idx[v.t]++;v.p=Math.round(40+f*50);v.u=1+Math.round(f*30)});
+SP[id]={n,t:t.split(",").map(fx),b:bs.slice(0,6),T:bs[6],mv:raw,lm:bs[6]<=350?2:bs[6]<=450?9:bs[6]<=560?18:28};DXI.push(id)});
+[["d001","wolf1",0],["d002","wolf2",1],["d003","wolf3",1],["d004","oct1",1],["d005","oct2",1],["d006","oct3",1],["d007","ele1",1],["d008","ele2",1],["d009","ele3",1]].forEach(([k,i,c])=>{SP[k].im=i;if(c)SP[k].c=1});
+const pid=x=>Array.isArray(x)?x.map(pid):"d"+String(x).padStart(3,"0");
+[[1,2,3],[4,5,6],[7,8,9],[10,11,12],[13,14,15],[17,18,19],[20,21,22],[23,24],[25,26],[28,29,30],[31,32,[33,34]],[35,[36,37]],[38,39,40],[41,42],[45,46],[49,50,51,52],[53,54,55,56],[65,66],[70,71],[72,73],[74,75,76],[77,78],[79,80],[98,99,[100,101]],[102,103],[107,108,109]].forEach(ch=>{const L=ch.length,lv=L==4?[12,24,40]:L==3?[16,32]:[16];ch.slice(0,-1).forEach((x,i)=>{SP[pid(x)].evo=[lv[i],pid(ch[i+1])]})});
+SP.d045.evo[0]=20;SP.d103&&(SP.d102.evo[0]=25);SP.d045c.evo=[20,"d046c"];SP.d045i.evo=[20,"d046i"];
+const IDS=[...DXI,...Object.keys(SP).filter(k=>!DXI.includes(k))];
+const R=n=>Math.floor(Math.random()*n),$=i=>document.getElementById(i);
+let G=null,S="title",I=0,B=null,tmp={},hud="Use as setas ou o direcional. Entre no mato alto 🌿 para achar monstros!",lock=0,iv=0;
+try{G=JSON.parse(localStorage.getItem("mb3"))}catch(e){}
+function save(){try{localStorage.setItem("mb3",JSON.stringify(G))}catch(e){}if(typeof SB!="undefined"&&SB.on&&G&&JSON.stringify(G.beat)!=SB.last){SB.last=JSON.stringify(G.beat);pushW()}}
+function st(m,k){const b=SP[m.sp].b[k];return k?Math.floor(2*b*m.lv/100)+5:Math.floor(2*b*m.lv/100)+m.lv+10}
+function mk(sp,lv){const m={sp,lv,xp:0,nick:SP[sp].n};m.mhp=m.hp=st(m,0);return m}
+const lead=()=>G.team.find(m=>m.hp>0);
+function moves(m){const s=SP[m.sp],u=s.mv.filter(v=>v.u<=m.lv).sort((a,b)=>b.p-a.p),o=[];s.t.forEach(t=>{const v=u.find(x=>x.t==t&&!o.includes(x));if(v)o.push(v)});u.forEach(v=>{if(o.length<4&&!o.includes(v))o.push(v)});return o.length?o:[{n:"Investida",t:"Normal",p:40,u:1}]}
+function mult(t,d){let x=1;SP[d.sp].t.forEach(y=>{const c=CH[t];if(c.s.includes(y))x*=2;if(c.w.includes(y))x*=.5;if(c.i.includes(y))x=0});return x}
+function spr(m){let x=spr0(m);if(m.sh)x=x.includes('style="')?x.replace('style="','style="filter:hue-rotate(150deg) saturate(1.4);'):x.replace("<img ",'<img style="filter:hue-rotate(150deg) saturate(1.4)" ');return x}
+function spr0(m){const s=SP[m.sp];return (s.im&&!PX[m.sp])?`<img class="sp${s.c?" cut":""}" src="${IM[s.im]}" alt="${s.n}">`:PX[m.sp]?`<img class="sp cut" style="image-rendering:pixelated" src="${pxu(m.sp)}" alt="${s.n}">`:`<div class="sp" style="background:linear-gradient(135deg,${TC[s.t[0]]},${TC[s.t[1]||s.t[0]]});color:#fff;text-shadow:0 1px 3px #0008">${TE[s.t[0]]}</div>`}
+const tags=m=>SP[m.sp].t.map(t=>`<span class="tg">${t}</span>`).join("");
+function bar(m){return`<div class="bar"><i style="width:${100*m.hp/m.mhp}%"></i></div><small>${m.hp}/${m.mhp} PS</small>`}
+function card(m){return`<div class="box row">${spr(m)}<div class="grow"><b>${m.nick}${m.sh?" ✨":""}</b> Lv${m.lv}<br>${tags(m)}${bar(m)}</div></div>`}
+let phoneFrom=0;
+function go(s){if(s=="world"&&phoneFrom&&["team","dex","shop","box","cfg"].includes(S))s="phone";if(s=="world")phoneFrom=0;S=s;I=0;stop();r()}
+function app(k){if(k=="save"){save();hud="💾 Jogo salvo!";r();return}phoneFrom=1;if(k=="cfg")cmsg="";go(k)}
+addEventListener("keydown",e=>{if(e.key=="i"||e.key=="I"){if(S=="world"&&!lock)go("phone");else if(S=="phone")go("world")}});
+/* ===== MAPA DA ILHA ===== */
+const W=96,H=72,CX=48,CY=36,TS=32,M=[];
+(function(){let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+for(let y=0;y<H;y++){M[y]=[];for(let x=0;x<W;x++){const dx=(x-CX)/(W*.46),dy=(y-CY)/(H*.46),r=Math.hypot(dx,dy),a=Math.atan2(dy,dx),e=1+.12*Math.sin(3*a+1)+.08*Math.sin(5*a+2)+.05*Math.sin(9*a);let t=0;
+if(r<e){t=r>e-.08?1:2;if(t==2){const n=Math.sin(x*.4)+Math.sin(y*.35)+Math.sin((x+y)*.22)+Math.sin((x-y)*.17);if(n>.9)t=3;else if(rnd()<.07)t=4}}M[y][x]=t}}
+for(let y=CY-5;y<=CY+7;y++)for(let x=CX-5;x<=CX+5;x++)M[y][x]=2;
+for(let y=CY-3;y<=CY;y++)for(let x=CX-2;x<=CX+2;x++)M[y][x]=6;M[CY][CX]=7;
+for(let y=CY+1;y<=CY+5;y++)M[y][CX]=5;for(let x=CX-8;x<=CX+8;x++)M[CY+5][x]=5;for(let y=CY-1;y<=CY+4;y++)for(let x=CX-13;x<=CX-7;x++)M[y][x]=2;for(let y=CY+1;y<=CY+3;y++)for(let x=CX-12;x<=CX-8;x++)M[y][x]=11;M[CY+3][CX-10]=9;M[CY+4][CX-10]=5})();
+const DIRS={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]};let curR="";
+const rd=(x,y)=>{if((M[y]||[])[x]>0)M[y][x]=5};
+for(let y=CY-26;y<=CY+5;y++)rd(CX+4,y);for(let y=CY+5;y<=CY+22;y++)rd(CX,y);for(let x=CX-40;x<=CX+40;x++)rd(x,CY+5);let dX=CX;while((M[CY+5]||[])[dX+1]>0)dX++;M[CY+5][dX]=10;const mcx=CX+16;for(let r=0;r<8;r++){const y=CY-11+r,hw=1+Math.floor(r*.6);for(let x=mcx-hw;x<=mcx+hw;x++)M[y][x]=12}M[CY-4][mcx]=13;for(let y=CY-3;y<=CY+5;y++)M[y][mcx]=5;
+const route0=(x,y)=>{if(G&&G.isl>=0){const s=ISL[G.isl],dx=x-32,dy=y-26,k=dy<-6?2:dx>6?3:dx<-6?4:dy>6?5:1;return["Rota "+k+" · "+s.name,s.pool.length<6?s.pool:s.pool.filter((q,i)=>(i+k)%2==0),s.sky]}const dy=y-CY,dx=x-CX;return dy<-7?["Rota 2 · Colinas do Norte",["d013","d013","d079","d061","d020","d064","d027","e1","e1","e2","d015","s1"],"#a99be0"]:dx>9?["Rota 3 · Avenida Leste",["d001","d065","d098","d074","d079","d001","r1","r1","r2"],"#ffb98a"]:dx<-9?["Rota 4 · Parque Oeste",["d025","d072","d072","d107","d023","d017","n1","n1","n2"],"#8ecbff"]:dy>9?["Rota 5 · Orla Sul",["d004","d038","d045","d045","d102","d077","d004"],"#7fd6e8"]:["Rota 1 · Campina Inicial",["d035","d062","d010","d041","d028","d007","d031","d070","d098","d001"],"#8ecbff"]};
+const TR=[["Lia",-3,8,"r","#d65a9e",[["n1",4],["d007",4]]],["Rafa",4,-11,"d","#e0a020",[["e1",8],["e2",10]]],["Bruna",14,5,"l","#d63a2c",[["r1",8],["r2",10]]],["Caio",-14,5,"r","#7a5a2c",[["n1",8],["n2",10],["d004",8]]],["Marina",0,13,"u","#2aa8c9",[["d004",9],["d005",12]]],["Mestre Zé",4,-15,"d","#6a2c9e",[["d002",14],["e2",14],["r2",14]]],["Dante",5,1,"l","#8a1c1c",[["d1",6]]],["Serafina",-5,1,"r","#cdbdff",[["a1",6]]]].map(([n,dx,dy,d,c,t],id)=>{let p=null;for(let r=0;r<8&&!p;r++)for(let j=-r;j<=r&&!p;j++)for(let i=-r;i<=r&&!p;i++){const x=CX+dx+i,y=CY+dy+j;if([2,5].includes((M[y]||[])[x]))p=[x,y]}return{id,n,d,c,t,x:p[0],y:p[1],i:0,al:0}});
+function seen(){if(!lead())return 0;const bt=G.beat||(G.beat={});for(const o of TR){if(bt[o.id]||!o.t.length||!vis(o))continue;if(o.k!=null)continue;const[a,b]=DIRS[o.d];for(let k=1;k<=(o.r||4);k++){const x=o.x+a*k,y=o.y+b*k,t=(M[y]||[])[x];if(t==4||t==6||TR.some(q=>q!=o&&q.x==x&&q.y==y))break;if(x==P.x&&y==P.y){lock=1;stop();o.al=1;draw();hud="❗ "+o.n+": “Ei! Você me viu, vamos batalhar!”";$("hud").textContent=hud;setTimeout(()=>startTr(o),1000);return 1}}}return 0}
+function startTr(o){o.i=0;o.al=0;const f=mk(o.t[0][0],o.t[0][1]);G.dex[f.sp]=G.dex[f.sp]||1;B={foe:f,tr:o,over:0,new:1,a:0,sky:route(P.x,P.y)[2],log:[o.n+" quer batalhar!",o.n+" enviou "+f.nick+"!"]};lock=0;go("battle")}
+for(let y=CY+14;y<H;y++)rd(CX,y);let PY=H-1;while(PY>CY&&!(M[PY][CX]>0))PY--;M[PY][CX]=8;
+const P={x:CX,y:CY+1};
+function draw(){const c=$("cv");if(!c||S!="world")return;const g=c.getContext("2d"),T=Date.now()/500|0,ox=P.x-5,oy=P.y-4;
+for(let j=0;j<9;j++)for(let i=0;i<11;i++){const x=ox+i,y=oy+j,t=(M[y]||[])[x]??0,X=i*TS,Y=j*TS;
+g.fillStyle=t==0?((x+y+T)&1?"#2a6fc9":"#3380d8"):t==1?PAL.s:(t==5||t==8)?"#c9a66b":t==10?(DOCK()?"#a0703a":PAL.s):t==12?"#7a7a86":t==13?"#1a1a24":t==15?PAL.a:t==16?"#5a4a3a":t==22?"#a02a3a":t==23?PAL.a:t==25?"#5a4a3a":(t==17||t==18)?PAL.a:t==19?"#8a5a2a":t==20?"#6a4a2a":t==21?"#7a4a2a":(t==2||t==4)?((x+y)&1?PAL.a:PAL.b):t==3?PAL.t:"#f0e6d2";g.fillRect(X,Y,TS,TS);
+if(t==8){g.fillStyle="#7a4a1e";g.fillRect(X+4,Y,24,TS);g.fillStyle="#fff";g.font="16px monospace";g.fillText("⛴",X+8,Y+22)}
+if(t==3){g.fillStyle="#2c7a38";for(let k=0;k<4;k++)g.fillRect(X+4+k*7,Y+8+(k%2)*9,3,12)}
+if(t==4){g.fillStyle="#6b4423";g.fillRect(X+13,Y+18,6,12);g.fillStyle="#2d7a34";g.beginPath();g.arc(X+16,Y+14,12,0,7);g.fill()}
+if(t==6||t==7||t==9||t==11){const L=(t==6||t==7)?6:11;if((M[y-1]||[])[x]!=L){g.fillStyle=(t==6||t==7)?"#c0392b":GC;g.fillRect(X,Y,TS,TS);if(t==11){g.fillStyle="#d4a74a";g.fillRect(X,Y+TS-5,TS,5)}}else{g.fillStyle="#fff7e0";g.fillRect(X,Y,TS,TS);g.fillStyle="#9fd0ee";g.fillRect(X+8,Y+7,16,13);g.fillStyle="#d4a74a";g.fillRect(X+15,Y+7,2,13)}}
+if(t==16){g.fillStyle="#7a6a58";g.fillRect(X,Y,TS,5)}if(t==22){g.fillStyle="#d4a74a";g.fillRect(X,Y,3,TS);g.fillRect(X+TS-3,Y,3,TS)}if(t==23){g.fillStyle="#f0ece0";g.fillRect(X+8,Y+2,16,28);g.fillStyle="#c8c0b0";g.fillRect(X+20,Y+2,4,28)}if(t==25){g.fillStyle="#7a6a58";g.fillRect(X,Y,TS,5);g.font="24px serif";g.fillText(GE,X+3,Y+26)}if(t==17){g.fillStyle="#7a2a2a";g.fillRect(X+3,Y+6,26,20);g.font="20px serif";g.fillStyle="#fff";g.fillText("⬇",X+6,Y+23)}if(t==18){g.font="24px serif";g.fillText("🩺",X+3,Y+24)}if(t==19){g.fillStyle="#a8743a";g.fillRect(X,Y,TS,8)}if(t==20){g.font="22px serif";g.fillText("📚",X+4,Y+24)}if(t==21){g.fillStyle="#d4a74a";g.fillRect(X+22,Y+16,4,4)}if(t==12){g.fillStyle="#a0a0ae";if((M[y-1]||[])[x]!=12)g.fillRect(X,Y,TS,7);g.fillStyle="#5a5a66";g.fillRect(X+7,Y+11,3,12);g.fillRect(X+19,Y+17,3,10)}if(t==13){g.fillStyle="#6a6a78";g.fillRect(X,Y,TS,4);g.fillRect(X,Y,4,TS);g.fillRect(X+TS-4,Y,4,TS)}if(t==15){g.fillStyle="#a0702a";g.fillRect(X+6,Y+12,20,14);g.fillStyle="#ffd23f";g.fillRect(X+14,Y+16,4,5)}if(t==10&&DOCK()){g.font="22px serif";g.fillText("⛵",X+4,Y+24)}if(t==7||t==9){g.fillStyle="#5a3a1e";g.fillRect(X+6,Y+4,20,28)}}
+TR.forEach(o=>{if(!vis(o))return;const X=(o.x-ox)*TS,Y=(o.y-oy)*TS;if(X<-TS||X>352||Y<-TS||Y>288)return;g.fillStyle="#0004";g.beginPath();g.ellipse(X+16,Y+29,10,4,0,0,7);g.fill();g.fillStyle=(G.beat&&G.beat[o.id])?"#888":o.c;g.fillRect(X+9,Y+13,14,13);g.fillStyle="#f1c27d";g.fillRect(X+10,Y+4,12,10);g.fillStyle="#222";g.fillRect(X+8,Y+2,16,4);g.fillStyle="#000";g.fillRect(o.d=="l"?X+11:o.d=="r"?X+18:X+14,Y+9,3,3);if(o.al){g.fillStyle="#e33";g.font="bold 24px monospace";g.fillText("!",X+11,Y-2)}else{g.font="bold 10px monospace";g.fillStyle="#000";g.fillText(o.n,X+17-o.n.length*3,Y);g.fillStyle="#fff";g.fillText(o.n,X+16-o.n.length*3,Y-1)}});
+Object.values(SB.peers).forEach(p=>{if(Date.now()-p.t>6000||p.isl!=curI()||p.inn!=(G.inn||0))return;const X=(p.x-ox)*TS,Y=(p.y-oy)*TS;if(X<-TS||X>352||Y<-TS||Y>288)return;g.fillStyle="#0004";g.beginPath();g.ellipse(X+16,Y+29,10,4,0,0,7);g.fill();g.fillStyle="#d63a8a";g.fillRect(X+9,Y+13,14,13);g.fillStyle="#f1c27d";g.fillRect(X+10,Y+4,12,10);g.fillStyle="#2c5a2c";g.fillRect(X+8,Y+2,16,5);g.font="bold 10px monospace";g.fillStyle="#fff";g.fillText(p.name,X+16-p.name.length*3,Y-1)});g.fillStyle="#fff";g.font="bold 14px monospace";const lx=(CX-ox)*TS,ly=(CY-3-oy)*TS;if(!(G.isl>=0||G.isl==-2||G.inn)&&lx>-60&&lx<400)g.fillText("ACADÉSIA",lx-26,ly+22);{const gx=(GP.x-ox)*TS,gy=(GP.y-oy)*TS;if(GP.x&&gx>-170&&gx<400)g.fillText("🏟️ GINÁSIO",gx+TS*1.0,gy+22)}
+const X=5*TS,Y=4*TS;g.fillStyle="#0004";g.beginPath();g.ellipse(X+16,Y+29,10,4,0,0,7);g.fill();g.fillStyle="#2c5fd6";g.fillRect(X+9,Y+13,14,13);g.fillStyle="#f1c27d";g.fillRect(X+10,Y+4,12,10);g.fillStyle="#d63a2c";g.fillRect(X+8,Y+2,16,5);g.fillStyle="#333";g.fillRect(X+10,Y+26,5,4);g.fillRect(X+17,Y+26,5,4)}
+function mv(dx,dy){if(S!="world"||lock)return;const nx=P.x+dx,ny=P.y+dy,t=(M[ny]||[])[nx];if(t==null||t==0||t==4||t==6||t==11||t==12||t==16||t==19||t==20||t==21||t==23||t==25||TR.some(o=>vis(o)&&o.x==nx&&o.y==ny))return;P.x=nx;P.y=ny;G.pos=[nx,ny];const rn=route(nx,ny)[0];if(rn!=curR){curR=rn;hud="📍 "+rn;$("hud").textContent=hud}
+if(t==8){port()}else if(t==7){enterIn(1)}
+else if(t==17){exitIn()}else if(t==18){healSt()}else if(t==13){G.isl==-2?leaveCave():enterCave()}else if(t==15){chest()}else if(t==10&&DOCK()){go("boat")}else if(t==9){enterIn(2)}else if(!seen()&&t==3&&Math.random()<.14&&lead()&&!repOn()){wild()}draw();updTk()}
+function hold(dx,dy){stop();mv(dx,dy);iv=setInterval(()=>mv(dx,dy),150)}
+function stop(){clearInterval(iv)}
+addEventListener("keydown",e=>{const k={ArrowUp:[0,-1],w:[0,-1],ArrowDown:[0,1],s:[0,1],ArrowLeft:[-1,0],a:[-1,0],ArrowRight:[1,0],d:[1,0]}[e.key];if(k&&S=="world"){e.preventDefault();mv(...k)}});
+setInterval(draw,500);
+function wild(){const l=lead(),[rn,p,sky]=route(P.x,P.y);
+
+const k=p[R(p.length)],f=mk(k,Math.max(SP[k].lm,l.lv+R(4)-2));G.dex[k]=G.dex[k]||1;if(Math.random()*100<(G.sh||0))f.sh=1;
+B={foe:f,over:0,new:1,a:0,sky,log:[`Um ${f.sh?"✨ BRILHANTE ":""}${SP[k].n} selvagem Lv${f.lv} saltou do mato!`]};lock=1;stop();$("cv").classList.add("fl");setTimeout(()=>{lock=0;go("battle")},480)}
+/* ===== TELAS ===== */
+const DLG=["Bem-vindo(a) ao Laboratório Monstro Bolso, na Ilha Monstro!","Eu sou o Professor João Pedro, 27 anos. Sim, pareço um estagiário, todo mundo diz isso.","Esta ilha gigante é lar de Monstros Bolso de todos os tipos. Alguns são amigos, outros são desafios!","Mas antes de tudo... qual é o seu nome?"];
+function bat(){const P=lead()||G.team[0],F=B.foe,a=B.a,n=B.new;B.a=0;B.new=0;
+const bx=(m,c)=>`<div class="bx ${c}"><b>${m.nick}${m.sh?" ✨":""}</b> Lv${m.lv}<div class="bar"><i style="width:${100*m.hp/m.mhp}%"></i></div><small>${m.hp}/${m.mhp}</small></div>`;
+let h=`<div class="arena" style="--sky:${B.sky}">${bx(F,"fb")}<div class="sh a"></div><div class="fs ${a=="f"?"shake":n?"enter":""}">${spr(F)}</div><div class="sh b"></div><div class="ps ${a=="p"?"shake":n?"enter":""}">${spr(P)}</div>${bx(P,"pb")}</div><div class="box log">${B.log.slice(-3).join("<br>")}</div>`;
+return h+(B.over?`<button onclick="cont()">▶ Continuar</button>`:`<div class="mn">`+moves(P).map((v,i)=>`<button onclick="act(${i})">${v.n} <small>${v.t}</small></button>`).join("")+`<button onclick="swap()">🔄 Trocar</button><button onclick="ball()">🔴 Bola (${G.balls})</button><button onclick="run()">🏃 Fugir</button></div>`)}
+function r(){const a=$("app");let h="<h1>🏝️ MONSTRO BOLSO 🏝️</h1>";
+if(S=="story"){const t=tmp.pg[tmp.i].replace(/\{n\}/g,G?G.name:"Aluno");h+=t=="@name"?`<div class="box">Qual é o seu nome, protagonista?<br><input id="nm" maxlength="12" placeholder="Seu nome"> <button onclick="nm()">OK</button></div>`:`<div class="box">${t.replace(/\n/g,"<br>")}</div><button onclick="nx()">▶ ${tmp.i<tmp.pg.length-1?"Próximo":"Continuar"}</button>`}
+else if(S=="urb"){h+=`<div class="box">🏙️ <b>Ilha Urbana</b><br>Prédios altos, bondes e uma multidão apressada. No centro da cidade fica a grande arena do primeiro Ginásio do arquipélago.</div><div class="box">${hud}</div>`+(G.badge?`<div class="box">🏅 Insígnia Normal conquistada! Próximo passo: a Elite dos Quatro.</div>`:"")+`<button onclick="gym()">🏟️ Ginásio Normal</button><button onclick="cure()">🏥 Centro de Cura</button><button onclick="back()">⛴️ Voltar a Aetherium</button>`+G.team.map(card).join("")}
+else if(S=="title"){h+=`<div class="box">Um RPG de monstros de bolso.<br>Explore a ilha, capture, treine, evolua!</div>`+(G&&G.team.length?`<button onclick="go(G.loc=='urb'?'urb':'world')">▶ Continuar (${G.name})</button>`:"")+`<button onclick="G=null;newGame()">Novo jogo</button>`}
+else if(S=="intro"){h+=`<div class="box"><b>Prof. João Pedro:</b><br>“${DLG[I]}”</div>`+(I<DLG.length-1?`<button onclick="I++;r()">▶ Próximo</button>`:`<input id="nm" maxlength="12" placeholder="Seu nome"> <button onclick="nm()">OK</button>`)}
+else if(S=="choose"){h+=`<div class="box"><b>Prof. Kunshu:</b><br>“Prazer, ${G.name}! Escolha seu parceiro. Os outros dois iniciais ficarão com seus colegas Dante e Serafina.”</div>`;[["d004","Polvo azul fofo. Equilibrado."],["d007","Elefante de madeira. Resistente."],["d001","Lobo de magma. Rápido e forte."]].forEach(([k,d])=>{const m=mk(k,5);h+=`<div class="box card row" onclick="tmp.sp='${k}';go('nick')">${spr(m)}<div class="grow"><b>${SP[k].n}</b> ${tags(m)}<br>${d}<br><small>${SP[k].n} → ${SP[SP[k].evo[1]].n} → ${SP[SP[SP[k].evo[1]].evo[1]].n}</small></div></div>`})}
+else if(S=="nick"){const m=mk(tmp.sp,5);h+=`<div class="box row">${spr(m)}<div class="grow">Que apelido dará a ${SP[tmp.sp].n}?<br><input id="nk" maxlength="12" value="${SP[tmp.sp].n}"> <button onclick="nk()">OK</button></div></div>`}
+else if(S=="gift"){h+=`<div class="box"><b>Prof. Kunshu:</b><br>“Aqui estão <b>5 Monstro Bolas</b> 🔴⚪ e a <b>Monstrodex</b> 📱! Dante ficou com ${SP[G.rv[0]].n} e Serafina com ${SP[G.rv[1]].n}, e vão competir com você! A ilha é enorme, ${G.name}: o mato alto esconde muita coisa. Ao norte, relâmpagos e assombrações; ao leste, aves de fogo; ao oeste, aves de campo. Boa jornada!”</div><button onclick="story(ST2,()=>go('world'))">▶ Continuar</button>`}
+else if(S=="world"){const l=lead();h+=`<canvas id="cv" width="352" height="288"></canvas><div class="box" id="hud">${hud}</div><div id="tk"></div><div class="dp"><button style="grid-column:2" onpointerdown="hold(0,-1)" onpointerup="stop()" onpointerleave="stop()" onpointercancel="stop()">▲</button><button style="grid-column:1;grid-row:2" onpointerdown="hold(-1,0)" onpointerup="stop()" onpointerleave="stop()" onpointercancel="stop()">◀</button><button style="grid-column:2;grid-row:2" onpointerdown="hold(0,1)" onpointerup="stop()" onpointerleave="stop()" onpointercancel="stop()">▼</button><button style="grid-column:3;grid-row:2" onpointerdown="hold(1,0)" onpointerup="stop()" onpointerleave="stop()" onpointercancel="stop()">▶</button></div><span id="rp">${repTxt()}</span> 🏅 ${nb()} · 🔴 ${G.balls} · 💰 ₽${G.money||0} · 📖 ${Object.values(G.dex).filter(v=>v==2).length}/${IDS.length}<br><button onclick="go('phone')">📱 Celular</button> <small>(tecla I no computador)</small>`}
+else if(S=="boat"){h+=`<div class="box">⛵ <b>Cais</b>: para onde vamos?<br>${hud}</div>`+(G.isl>=0?`<button onclick="sail(-1)">🏠 Ilha Urbana (início)</button>`:"")+ISL.map((s,i)=>i==G.isl?"":`<button onclick="sail(${i})">${s.name}<br><small>${s.types.join("/")}${s.leader?" · 🏟️ "+s.leader.b+(G.beat&&G.beat[s.leader.id]?" ✔":""):""}</small></button>`).join("")+`<br><button onclick="go('world')">◀ Ficar</button>`}
+else if(S=="cfg"){h+=`<div class="box"><b>⚙️ Configurações</b><br>✨ Chance de brilhantes: ${G.sh||0}%</div><button onclick="cmsg='';go('code')">🔑 Código</button><button onclick="go('world')">◀ Voltar</button>`}
+else if(S=="code"){h+=`<div class="box"><b>🔑 Código</b><br>Digite o código:<br><input id="cd" maxlength="20" placeholder="Código"> <button onclick="cdo()">OK</button><br>${cmsg}</div><button onclick="go('cfg')">◀ Voltar</button>`}
+else if(S=="otto"){h+=`<div class="box"><b>🎁 Código OTTO</b><br>Escolha um monstro da Monstrodex:<br><select id="os" style="width:100%;font:inherit;padding:6px">${IDS.map(k=>`<option value="${k}">${k[0]=="d"?"#"+k.slice(1,4):"★"} ${SP[k].n} [${SP[k].t.join("/")}]</option>`).join("")}</select><br>Nível: <input id="lv" type="number" value="20" min="1" max="100" style="width:70px"> <button onclick="give()">🎁 Receber</button><br>${cmsg}</div><button onclick="go('cfg')">◀ Voltar</button>`}
+else if(S=="online"){h+=`<div class="box"><b>🌐 Online (Supabase)</b><br><small>Todos usam o mesmo código de sala. O mundo (treinadores vencidos, insígnias e baús) é compartilhado.</small><br>URL do projeto:<br><input style="width:95%" value="${SB.url}" onchange="SB.url=this.value.trim();sbKeep()"><br>Chave anon:<br><input style="width:95%" value="${SB.key}" onchange="SB.key=this.value.trim();sbKeep()"><br>Sala (código):<br><input style="width:60%" value="${SB.room}" onchange="SB.room=this.value.trim().toUpperCase();sbKeep()"><br>Seu apelido:<br><input style="width:60%" value="${SB.me||G.name}" onchange="SB.me=this.value.trim();sbKeep()"></div><div class="box">${SB.msg||"Desconectado."}<br>Na sala: ${Object.values(SB.peers).filter(p=>Date.now()-p.t<6000).map(p=>p.name).join(", ")||"ninguém ainda"}</div>`+(SB.on?`<button onclick="sbOff()">⛔ Desconectar</button><button onclick="cloudSave()">☁️ Salvar na nuvem</button><button onclick="cloudLoad()">☁️ Carregar</button>`:`<button onclick="sbConnect()">🔌 Conectar</button>`)+`<br><button onclick="go('phone')">◀ Celular</button>`}
+else if(S=="phone"){h+=`<div class="box" style="max-width:340px;margin:8px auto;border-radius:28px;padding:16px;background:#1b2230;color:#fff"><div style="text-align:center;font-size:12px;opacity:.7">📱 Celular · ${G.name} · 💰 ₽${G.money||0}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">`+[["👥","Equipe","team"],["📖","Monstrodex","dex"],["🛒","Loja","shop"],["📦","Box","box"],["⚙️","Config","cfg"],["🌐","Online","online"],["💾","Salvar","save"]].map(([e,n,k])=>`<button onclick="app('${k}')" style="background:#2b3548;color:#fff;border-radius:16px;padding:12px 4px;font-size:26px;display:flex;flex-direction:column;align-items:center;gap:4px;margin:0">${e}<span style="font-size:11px">${n}</span></button>`).join("")+`</div><div style="text-align:center;margin-top:12px;font-size:12px">${hud}</div></div><button onclick="go('world')">◀ Fechar celular</button>`}
+else if(S=="shop"){h+=`<div class="box"><b>🛒 Loja do Laboratório</b><br>Monstro Bola: ₽100 cada<br>💰 ₽${G.money||0} · 🔴 ${G.balls}</div><div class="box">${hud}</div><button onclick="buy(1)">Comprar 1 (₽100)</button><button onclick="buy(5)">Comprar 5 (₽500)</button><button onclick="buy(10)">Comprar 10 (₽1000)</button><br><button onclick="buyRep()">🛡️ Repelente 5 min (₽200)</button><br><small>O repelente afasta monstros selvagens do mato por 5 minutos.</small><br><button onclick="hud='';go('world')">◀ Voltar</button>`}
+else if(S=="box"){const bx=G.box||(G.box=[]);h+=`<div class="box"><b>📦 Box</b> (${bx.length} guardados) · Equipe ${G.team.length}/6<br>${hud}</div><b>Equipe</b>`+G.team.map((m,i)=>card(m)+`<button onclick="dep(${i})">📥 Guardar na Box</button>`).join("")+`<br><b>Na Box</b>`+(bx.length?bx.map((m,i)=>card(m)+`<button onclick="wd(${i})">📤 Colocar na equipe</button>`).join(""):`<div class="box">Vazia</div>`)+`<br><button onclick="hud='';go('world')">◀ Voltar</button>`}
+else if(S=="team"){h+=G.team.map(card).join("")+`<button onclick="go('world')">◀ Voltar</button>`}
+else if(S=="dex"){h+=`<div class="box">`+IDS.map((k,i)=>{const v=G.dex[k];return`#${k[0]=="d"?k.slice(1,4):"★"} ${v?(v==2?"✔ ":"👁 ")+SP[k].n+" ["+SP[k].t.join("/")+"]":"???"}`}).join("<br>")+`</div><button onclick="go('world')">◀ Voltar</button>`}
+else if(S=="battle")h=bat();
+a.innerHTML=h;if(S=="world"){draw();updTk()}}
+function buy(n){const c=n*100;if((G.money||0)<c)hud="Dinheiro insuficiente! 💸";else{G.money-=c;G.balls+=n;hud="Você comprou "+n+" Monstro Bola(s)! 🔴"}save();r()}
+function updTk(){const e=$("tk");if(!e||!G)return;const o=TR.find(o=>(o.say||o.ld||(o.k!=null&&o.t.length&&!(G.beat&&G.beat[o.id])))&&vis(o)&&Math.abs(o.x-P.x)<=2&&Math.abs(o.y-P.y)<=2);e.innerHTML=o?`<button onclick="talk(${TR.indexOf(o)})">💬 Falar com ${o.n}</button>`:""}
+function talk(i){const o=TR[i];if(!o)return;if(o.ld){gymN();return}if(o.say){const s=typeof o.say=="function"?o.say():o.say;if(o.heal)G.team.forEach(m=>m.hp=m.mhp);hud="💬 "+o.n+": “"+s+"”";$("hud").textContent=hud;save();return}lock=1;stop();o.al=1;draw();hud="💬 "+o.n+": “Vamos ver quem é o melhor da turma!”";$("hud").textContent=hud;$("tk").innerHTML="";setTimeout(()=>startTr(o),900)}
+const GL={id:99,n:"Líder Norma",t:[["d062",17],["d036",19],["d037",19]],i:0,b:"Normal"};
+[["Tomás",-22,5,"r","#3a7d44",[["d025",12],["d072",12]]],["Bia",22,5,"l","#d4688a",[["d065",13],["d098",13]]],["Pedro",4,-22,"d","#3a5fd6",[["d079",14],["d013",14],["e1",14]]]].forEach(([n,dx,dy,d,c,t])=>{const[x,y]=plc(dx,dy);TR.push({id:TR.length,n,d,c,t,x,y,i:0,al:0})});
+function gymN(){let m;const I=G.isl>=0?ISL[G.isl]:null,L=I?I.leader:GL;if(!lead())m="Cure sua equipe primeiro!";else{const f=(I?I.tm:MAIN.TR.filter(o=>o.k==null)).filter(o=>!(G.beat&&G.beat[o.id]));if(G.beat&&G.beat[L.id])m="🏅 "+L.n+": “Você já tem a Insígnia "+L.b+". Boa jornada!”";else if(f.length)m="🏟️ "+L.n+": “Só aceito desafiantes que venceram todos os treinadores desta ilha (menos os rivais). Faltam: "+f.map(o=>o.n).join(", ")+".”";else{lock=1;stop();m="🏟️ "+L.n+": “Você derrotou todos! Vamos ao duelo!”";setTimeout(()=>startTr(L),900)}}hud=m;$("hud").textContent=m}
+let cmsg="";
+function cdo(){const v=$("cd").value.trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");if(v=="OTTO"){cmsg="";go("otto")}else if(v=="OTAVIO"){if(!G.beat)G.beat={};G.beat[99]=1;ISL.forEach(I=>{if(I.leader)G.beat[I.leader.id]=1});cmsg="🏅 Todas as insígnias liberadas! ("+nb()+")";save();r()}else{cmsg="Código inválido.";r()}}
+function give(){const k=$("os").value,lv=Math.max(1,Math.min(100,+$("lv").value||20)),m=mk(k,lv);G.dex[k]=2;G.sh=Math.min(100,(G.sh||0)+1);if(G.team.length<6)G.team.push(m);else(G.box||(G.box=[])).push(m);cmsg="🎁 "+m.nick+" recebido"+(G.team.includes(m)?"!":" (enviado à Box)!")+" ✨ Chance de brilhantes: "+G.sh+"%";save();r()}
+const LEG=new Set(["d1","a1",..."49,50,51,52,53,54,55,56,58,59,60,67,68,106,110".split(",").map(x=>"d"+x.padStart(3,"0")),...IDS.filter(k=>(SP[k].T||0)>=600)]);
+const Tt=k=>SP[k].T||400,poolOf=ty=>IDS.filter(k=>!LEG.has(k)&&Tt(k)<=560&&SP[k].t.some(t=>ty.includes(t)));
+let PAL={s:"#e8d28a",a:"#5cb85c",b:"#56b056",t:"#3f9a4a"},GP={x:CX-12,y:CY+1};const PM=PAL,DOCK=()=>G.isl>=0||!!(G.beat&&G.beat[99]),nb=()=>Object.keys(G.beat||{}).filter(k=>k==99||(k>=200&&k<=211)).length;
+const sh=(c,f)=>"#"+[1,3,5].map(i=>Math.min(255,Math.round(parseInt(c.substr(i,2),16)*f)).toString(16).padStart(2,"0")).join("");
+const NM=["Ravi","Mia","Léo","Nina","Théo","Zara","Iago","Lúcia","Hugo","Alice","Bento","Cora","Dino","Eva","Fabi","Gil"];
+const ISL="Ilha Ensetada|Inseto|||#9bbf3a|#c8e88e;Ilha da Natureza|Planta|Líder Flora|Planta|#3f9f4a|#9ad8a0;Ilha Tecnológica|Aço,Elétrico|Líder Volt|Aço/Elétrico|#8c9aaa|#a8c0e0;Ilha Oceânica Glacial|Água,Gelo|Líder Maré|Água/Gelo|#bfe0ee|#b8e4f8;Ilha da Mente|Psíquico|Líder Mentor|Psíquico|#b07cc8|#e0b8f0;Ilha dos Titãs: Rocha e Terra|Pedra,Terrestre|Líder Cíntia|Rocha/Terra|#b89a6a|#e8c898;Ilha dos Titãs: Lutas|Lutador|Líder Punho|Lutador|#c46a52|#f0a890;Ilha da Harmonia|Som|Rei do Ritmo|Som|#e68ab4|#f8c8e0;Ilha Espectral|Fantasma|||#5a4a78|#8a78b0;Ilha dos Dragões|Dragão|||#8a3a3a|#b86868;Ilha Venenosa|Venenoso|||#7a5a9a|#a890c8;Ilha Liminar|Sombrio,Fantasma|||#8a8a60|#c8c890".split(";").map((l,i)=>{const[name,ty,ln,b,c,sky]=l.split("|"),types=ty.split(","),pool=poolOf(types),lv=14+i*3,top=pool.slice().sort((a,b)=>Tt(b)-Tt(a)),pick=(n,t)=>Array.from({length:n},(_,k)=>pool[(i*7+t*3+k*5)%pool.length]);
+return{name:"🏝️ "+name,types,pool,sky,lv,pal:{s:i==3?"#eaf6fb":"#e8d28a",a:c,b:sh(c,.94),t:sh(c,.72)},leader:ln?{id:200+i,n:ln,b,t:[[top[3%top.length],lv+3],[top[1%top.length],lv+4],[top[0],lv+5]],i:0}:null,tm:[0,1,2].map(t=>({id:400+i*10+t,n:NM[(i*3+t)%NM.length],t:pick(t==2?3:2,t).map((s,j)=>[s,lv+j])}))}});
+function pcx(cx,cy,dx,dy){for(let r=0;r<9;r++)for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){const x=cx+dx+i,y=cy+dy+j;if([2,5].includes((M[y]||[])[x])&&!TR.some(o=>o.x==x&&o.y==y))return[x,y]}}
+const MAIN={M:M.map(r=>r.slice()),TR:TR.slice(),gp:GP,dX,cvx:CX+16,cvy:CY-4};
+function loadIsl(i,keep){if(i==-2)return loadCave(keep);M.length=0;TR.length=0;if(i<0){MAIN.M.forEach(r=>M.push(r.slice()));MAIN.TR.forEach(o=>TR.push(o));PAL=PM;GC="#8a8a5c";GP=MAIN.gp;if(!keep){P.x=MAIN.dX-1;P.y=CY+5}return}
+const S=ISL[i];PAL=S.pal;GC=sh(S.pal.a,.65);let s=500+i*91;const rnd=()=>(s=(s*16807)%2147483647)/2147483647,cx=32,cy=26;
+for(let y=0;y<56;y++){M[y]=[];for(let x=0;x<64;x++){const dx=(x-cx)/25.6,dy=(y-cy)/22.4,r=Math.hypot(dx,dy),a=Math.atan2(dy,dx),e=1+.1*Math.sin(3*a+i)+.07*Math.sin(5*a+2*i)+.04*Math.sin(9*a);let t=0;if(r<e){t=r>e-.1?1:2;if(t==2){const n=Math.sin(x*.5+i)+Math.sin(y*.45)+Math.sin((x+y)*.25)+Math.sin((x-y)*.2);if(n>.7)t=3;else if(rnd()<.06)t=4}}M[y][x]=t}}
+let d=cy;while((M[d+1]||[])[cx]>0)d++;
+for(let y=cy-5;y<=d;y++)for(let x=cx-4;x<=cx+4;x++)if(M[y][x]>1)M[y][x]=2;
+for(let y=cy-1;y<=d;y++)M[y][cx]=5;
+if(S.leader){for(let y=cy-4;y<=cy-2;y++)for(let x=cx-2;x<=cx+2;x++)M[y][x]=11;M[cy-2][cx]=9;GP={x:cx-2,y:cy-4}}else GP={x:0,y:0};
+M[d][cx]=10;for(let x=0;x<64;x++){const t=M[cy+4][x];if(t>0&&t!=10&&t!=11&&t!=4)M[cy+4][x]=5}
+S.tm.forEach((o,k)=>{const[dx,dy,dr]=[[-7,3,"r"],[7,3,"l"],[0,-9,"d"]][k],[x,y]=pcx(cx,cy,dx,dy);TR.push({id:o.id,n:o.n,d:dr,c:["#3a7d44","#d4688a","#3a5fd6"][k],t:o.t,x,y,i:0,al:0})});
+if(!keep){P.x=cx;P.y=d-1}}
+function sail(i){G.isl=i;loadIsl(i);G.pos=[P.x,P.y];curR="";hud="⛵ Chegamos! "+(i<0?"Ilha Urbana.":ISL[i].name+". Aqui só aparecem monstros do tipo "+ISL[i].types.join("/")+".");save();go("world")}
+
+const PX={};`d010|T|#7d6a4a|#6fbf4a|l
+d011|T|#6f5e3e|#58b043|lb
+d012|T|#8d8d95|#3f9f3a|b
+d013|C|#ffd23f|#fff3a0|e
+d014|C|#f6c431|#ffffff|e
+d015|C|#ffe14d|#7ad7ff|eg
+d016|Y|#ffd23f|#ff8fb8|er
+d017|D|#f0f6ff|#9fd8ff|i
+d018|Q|#eaf3ff|#8ecbff|i
+d019|Q|#dfeaf8|#6fb2ee|ih
+d020|R|#2e2e3d|#7a4fb8|m
+d021|R|#262633|#6a43a8|m
+d022|R|#1d1d28|#8a35d0|m
+d023|S|#f2f2f2|#25252d|k
+d024|S|#f2f2f2|#25252d|k
+d025|B|#35353f|#ffa11a|Tl
+d026|B|#3f8f4a|#ffa11a|Tl
+d027|P|#5b3b24|#2f8f3f|g
+d027c|P|#e8dab4|#86e8a8|ga
+d027i|P|#2b1b15|#ff6a2f|gf
+d028|S|#4a3a2a|#8a2f2f|
+d029|S|#3a2a3e|#a03fc0|
+d030|S|#5a3f2a|#d07a2a|
+d031|X|#f4f4f4|#8a8a9a|P
+d032|X|#f4f4f4|#8a8a9a|B
+d033|X|#e8e8ee|#7a7a8a|K
+d034|X|#f4f4f4|#a07ad0|Q
+d035|Y|#a5733f|#dcb67e|
+d036|Y|#a5733f|#dcb67e|c
+d037|Y|#ad7a4a|#f4c4d4|c
+d038|F|#8fa6b8|#dfe8f0|mo
+d039|K|#8fa0b0|#4a6a8a|m
+d040|K|#6a86a0|#2a4a6a|m
+d041|V|#7a3fb0|#4fae3a|
+d042|V|#5a1f6a|#3a7a3a|
+d043|Y|#2f6f7f|#f4efd0|z
+d043c|Y|#d4e8f6|#ffffff|za
+d043i|Y|#3a2a3c|#b02a2a|zh
+d044|O|#cfd6e8|#eef0fa|z
+d045|F|#f4733a|#ffe0a0|
+d045c|F|#d8ecff|#ffffff|a
+d045i|F|#d6452a|#ffb43a|f
+d046|K|#3a6fb8|#f4e4b0|
+d046c|K|#e8f4ff|#9fd8ff|wa
+d046i|K|#7a1f1f|#ff7a2a|f
+d047|C|#f8f2ff|#ffd6f0|wa
+d048|C|#2c1c2c|#ff5a2a|fh
+d049|H|#c0392b|#2a1a1a|hf
+d050|H|#2d2d48|#f0e6ff|wh
+d051|H|#a82a2a|#2a1a1a|hfw
+d052|H|#c8201f|#1a1a1a|hwS
+d053|H|#fff5d0|#ffffff|wa
+d054|H|#fff0c0|#ffffff|wa
+d055|H|#ffe9a0|#ffffff|wa
+d056|H|#ffd86a|#ffffff|wa
+d057|Q|#6b4a3a|#a050d0|g
+d058|Y|#b89a7a|#e0b8ff|S
+d059|Q|#fff8d6|#ffe27a|a
+d060|R|#2a3a4a|#40e0ff|m
+d061|R|#2a3a4a|#40e0ff|m
+d062|Z|#f4f4f4|#25252d|
+d063|W|#7a4a2a|#e8d8a8|l
+d064|G|#7a7a8a|#9a6aff|g
+d065|H|#ff7a2f|#ffd23f|wf
+d066|H|#ff9a2f|#ffe27a|wf
+d067|H|#8a8a8a|#c8c8c8|g
+d068|H|#f0e8ff|#6ab0ff|a
+d069|N|#8a5a2a|#4fae3a|lg
+d070|Y|#f4faff|#bfe4ff|i
+d071|Y|#f4faff|#aad8f0|i
+d072|H|#5a8a3a|#e8c8a0|y
+d073|H|#7a6a5a|#e8c8a0|y
+d074|I|#40c0a0|#a8f0e0|
+d075|I|#2a8ac0|#9ae0ff|
+d076|I|#7a3fb0|#ff9af0|h
+d077|L|#9fd8f0|#a050d0|
+d078|L|#bfe8ff|#8a2fc0|i
+d079|C|#ff8a3a|#ffd23f|fe
+d080|Q|#f4a030|#ffe14d|fe
+d081|H|#4fae3a|#e03a3a|x
+d082|B|#6a4a2a|#e8e0c0|
+d083|G|#8a7a6a|#c0392b|x
+d084|Y|#4fae5a|#a050d0|
+d085|Y|#a07a4a|#6a4a2a|
+d086|I|#2a8a5a|#ffd23f|d
+d087|K|#8a7a8a|#d0a0ff|m
+d088|I|#6fcf5a|#ff6aa0|l
+d089|K|#9fe0ff|#f0f8ff|w
+d090|B|#2a2030|#7a2fc0|
+d091|B|#5a6a8a|#ffe14d|e
+d092|H|#7a7a8a|#8fc83a|wh
+d093|G|#bfe0f0|#6a6a7a|i
+d094|F|#9fd8f0|#c8a0ff|
+d095|O|#c8a8ff|#9fe8ff|
+d096|P|#3fae5a|#ffe14d|e
+d097|Y|#a0c8e0|#e8f4ff|i
+d098|D|#8a8a8a|#b0a090|
+d099|G|#a89888|#e0c8a8|C
+d100|D|#6a3a2a|#ff6a2a|wf
+d101|D|#e8f4ff|#4a8ad0|wi
+d102|B|#ffd23f|#fff0a0|D
+d103|B|#ffd23f|#a0e0ff|Da
+d104|H|#8a5aff|#ffd23f|n
+d105|C|#8a5a3a|#f0d0a0|r
+d106|D|#3a7ac0|#f0d060|n
+d107|H|#c08a4a|#e8c8a0|n
+d108|H|#a05ad0|#f0e0ff|n
+d109|H|#d05aa0|#ffe0ff|na
+d110|O|#d8c868|#8a7a30|g
+d001|Q|#2b2228|#ff6a1a|fhv
+d002|Q|#241c20|#ff7a1a|fhv
+d003|Q|#1d1719|#ff8a1a|fhv3
+d004|A|#3a6fe0|#9fe8ff|
+d005|A|#2f5fd0|#9fe8ff|o
+d006|A|#2450c0|#7fe0ff|o
+d007|E|#8a6a3a|#6fbf4a|l
+d008|E|#7a5a30|#58b043|l
+d009|E|#6a4a28|#3f9f3a|l
+e1|O|#ffe14d|#9fefff|eg
+e2|H|#ffd23f|#7ae0ff|egS
+e3|H|#ffe14d|#bfefff|egSa
+r1|B|#9a9aa2|#ff8a1a|f
+r2|B|#2a2a30|#ff4a1a|f
+r3|B|#ff6a1a|#ffe27a|fh
+s1|P|#3a2a22|#3f9a3f|g
+n1|B|#f4d058|#fff0a0|
+n2|B|#7a5a30|#f0d040|
+n3|B|#6a4a28|#f4d030|h`.trim().split("\n").forEach(l=>{const[id,a,m,s,f]=l.split("|");PX[id]={a,m,s,f:f||""}});PX.d1=PX.d049;PX.a1=PX.d053;PX.cp=PX.d035;PX.bo=PX.d062;
+function pixGrid(id){const sp=SP[id],q=PX[id],N=40,g=Array.from({length:N},()=>Array(N).fill(null)),Tt=sp.T||400,f=Math.max(.62,Math.min(1.02,.6+(Tt-300)/650)),m=q.m,s=q.s,fl=q.f,d=sh(m,.68),l=sh(m,1.28),sd=sh(s,.68),sl=sh(s,1.25),K="#1d1b26",Y0=37;
+const X=x=>20+(x-20)*f,Y=y=>Y0+(y-Y0)*f,P=(x,y,c)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<N&&y<N)g[y][x]=c};
+const E=(cx,cy,rx,ry,c)=>{cx=X(cx);cy=Y(cy);rx*=f;ry*=f;for(let y=Math.floor(cy-ry);y<=Math.ceil(cy+ry);y++)for(let x=Math.floor(cx-rx);x<=Math.ceil(cx+rx);x++)if(((x-cx)/(rx+.4))**2+((y-cy)/(ry+.4))**2<=1)P(x,y,c)};
+const R=(x,y,w,h,c)=>{const a=X(x),b=Y(y);for(let j=0;j<Math.max(1,Math.round(h*f));j++)for(let i=0;i<Math.max(1,Math.round(w*f));i++)P(a+i,b+j,c)};
+const Tri=(ax,ay,bx,by,cx,cy,c)=>{ax=X(ax);ay=Y(ay);bx=X(bx);by=Y(by);cx=X(cx);cy=Y(cy);const dd=(by-cy)*(ax-cx)+(cx-bx)*(ay-cy);if(!dd)return;for(let y=Math.floor(Math.min(ay,by,cy));y<=Math.ceil(Math.max(ay,by,cy));y++)for(let x=Math.floor(Math.min(ax,bx,cx));x<=Math.ceil(Math.max(ax,bx,cx));x++){const a=((by-cy)*(x-cx)+(cx-bx)*(y-cy))/dd,b=((cy-ay)*(x-cx)+(ax-cx)*(y-cy))/dd;if(a>=-.08&&b>=-.08&&1-a-b>=-.08)P(x,y,c)}};
+const Ln=(x1,y1,x2,y2,c,w=1)=>{const n=Math.round(Math.max(Math.abs(x2-x1),Math.abs(y2-y1))*2+1),k=Math.max(1,Math.round(w*f));for(let i=0;i<=n;i++){const x=X(x1+(x2-x1)*i/n),y=Y(y1+(y2-y1)*i/n);for(let a=0;a<k;a++)for(let b=0;b<k;b++)P(x+a,y+b,c)}};
+const eye=(x,y)=>{const a=Math.round(X(x)),b=Math.round(Y(y));if(fl.includes("z")){P(a,b+1,K);P(a+1,b+1,K);P(a+2,b+1,K);return}if(fl.includes("g")){P(a,b,"#aaffff");P(a+1,b,"#aaffff");P(a,b+1,"#44ddff");P(a+1,b+1,"#44ddff");return}P(a,b,"#ffffff");P(a+1,b,K);P(a,b+1,K);P(a+1,b+1,K);if(f>.7){P(a,b+2,K);P(a+1,b+2,K)}};
+let hx=12,hy=19,bx=22,by=26,tx=0,ty=0;
+if(fl.includes("w")&&!"HDK".includes(q.a)){Tri(18,24,5,8,13,31,s);Tri(26,24,37,8,31,31,s)}
+switch(q.a){
+case"Q":hx=11;hy=19;tx=33;ty=19;Ln(30,25,tx,ty,m,3);E(tx,ty,2,2,s);R(18,31,3,6,d);R(30,31,3,6,d);R(13,30,3,7,m);R(26,30,3,7,m);E(22,26,10,6,m);E(14,28,3,3,s);if(fl.includes("v")){Ln(17,24,21,29,s);Ln(23,22,27,28,s);Ln(28,25,31,29,s)}if(fl.includes("3")){for(const[x,y]of[[7,21],[14,15],[21,17]]){E(x,y,5,4.2,m);E(x-4,y+1.5,2.5,1.5,m);Tri(x-3,y-3,x-3,y-9,x+1,y-3,m);P(X(x-5),Y(y+1),K);eye(x-2,y-2)}hx=14;hy=15}else{E(11,20,6,5,m);E(6,22,3,2,m);P(X(4),Y(21),K);Tri(8,17,8,10,12,16,m);Tri(12,16,15,10,16,18,d);eye(8,19)}break;
+case"C":hx=12;hy=20;tx=35;ty=17;Ln(30,28,35,25,m,2);Ln(35,25,tx,ty,m,2);E(tx,ty,1.5,1.5,s);R(18,31,3,6,d);R(30,31,3,6,d);R(13,31,3,6,m);R(26,31,3,6,m);E(22,27,9,5,m);E(15,29,3,3,s);E(12,21,6,6,m);Tri(7,17,7,9,12,14,m);Tri(13,14,17,9,18,17,m);Tri(8,16,8,12,11,15,s);eye(8,20);eye(13,20);P(X(11),Y(23),"#ff8fa0");break;
+case"B":hx=13;hy=19;tx=34;ty=28;Tri(28,25,36,30,28,32,d);R(18,33,1,4,"#d9a441");R(23,33,1,4,"#d9a441");E(21,26,8,7,m);E(19,28,5,4,s);E(24,26,6,4,d);Tri(27,26,33,31,23,31,d);E(13,19,5,5,m);if(fl.includes("T")){Tri(8,17,0,20,8,24,s)}else if(fl.includes("D")){E(6,22,4,2,"#f0a030")}else Tri(8,19,3,21,8,23,"#f0a030");eye(11,17);break;
+case"O":hx=20;hy=14;bx=20;by=22;E(20,18,9,9,m);for(let x=11;x<30;x++){const b=(x%4<2)?34:31;for(let y=18;y<=b;y++)P(X(x),Y(y),m)}R(12,28,17,3,s);E(10,25,2,3,m);E(30,25,2,3,m);R(15,15,3,4,K);R(23,15,3,4,K);P(X(16),Y(15),"#ffffff");P(X(24),Y(15),"#ffffff");R(19,22,3,2,K);break;
+case"H":hx=20;hy=11;bx=20;by=22;{const wb=fl.includes("S")?7:fl.includes("w")&&fl.includes("f")&&q.m=="#a82a2a"?15:10;if(fl.includes("w")){Tri(15,16,3,4,10,28,s);Tri(25,16,37,4,30,28,s)}R(16,27,3,8,d);R(21,27,3,8,d);R(20-wb/2,16,wb,12,m);R(20-wb/2-3,17,3,10,m);R(20+wb/2,17,3,10,m);const hc=fl.includes("h")||fl.includes("g")?m:"#f1c9a0";E(20,10,5,5,hc);E(20-wb/2-1,28,2,2,hc);E(20+wb/2+2,28,2,2,hc);eye(18,9);eye(21,9);if(fl.includes("y")){Tri(14,8,20,-4,26,8,s);E(20,15,3,3,"#f4f4f4")}if(fl.includes("x")){E(20-wb/2-2,27,3,3,"#d03a3a");E(20+wb/2+3,27,3,3,"#d03a3a")}}break;
+case"R":hx=20;hy=12;bx=20;by=24;{const gl=fl.includes("e")?"#ffe14d":s;R(14,29,5,6,sd);R(21,29,5,6,sd);R(12,18,16,12,m);R(14,20,12,2,s);E(20,25,3,3,gl);R(8,19,4,9,s);R(28,19,4,9,s);R(14,8,12,9,m);R(16,11,8,3,K);P(X(18),Y(12),gl);P(X(22),Y(12),gl);R(20,4,1,4,s);P(X(20),Y(3),gl)}break;
+case"D":hx=11;hy=18;tx=36;ty=22;Tri(17,24,25,4,33,24,s);Ln(25,5,27,24,sd);Ln(30,29,tx,ty,m,3);Tri(tx-1,ty-3,tx+3,ty,tx-1,ty+3,s);R(16,31,4,6,d);R(27,31,4,6,d);E(22,27,9,6,m);E(21,30,6,3,s);R(13,20,6,8,m);E(11,18,5,4,m);E(6,20,4,2,m);for(let x=17;x<31;x+=4)Tri(x,23,x+2,19,x+4,23,s);Tri(11,15,12,10,14,15,s);eye(9,17);break;
+case"S":hx=14;hy=26;bx=25;by=23;for(let i=0;i<4;i++){const a=15+i*4,b=5+i*8,c2=29+(i%2)*3;Ln(a,27,b,c2,d);Ln(b,c2,b-1,36,d)}E(25,23,9,8,m);E(14,26,5,4,m);P(X(11),Y(29),"#e8e8e8");P(X(15),Y(29),"#e8e8e8");eye(10,24);eye(14,24);break;
+case"T":hx=10;hy=27;bx=22;by=24;tx=34;ty=29;R(13,30,5,5,s);R(27,30,5,5,s);Tri(33,29,38,31,33,33,s);R(12,27,5,3,s);E(10,27,4,3,s);R(11,28,23,3,sd);E(22,24,11,8,m);if(fl.includes("l")){E(18,20,4,2,"#58b043");E(26,21,3,2,"#58b043")}if(fl.includes("b")){const big=m=="#8d8d95";if(big)R(12,15,20,12,"#6d6d75");R(15,big?17:19,14,big?8:7,"#3fae5a");R(21,big?17:19,1,big?8:7,"#ffffff");E(22,big?21:22,2,2,"#ffffff")}eye(8,26);break;
+case"P":hx=20;hy=10;bx=20;by=22;Tri(13,36,17,29,17,36,m);Tri(27,36,23,29,23,36,m);R(17,20,6,16,m);E(20,13,10,8,s);E(12,17,6,5,s);E(28,17,6,5,s);E(20,9,6,4,sh(s,1.25));eye(17,24);eye(21,24);R(19,28,3,1,K);break;
+case"V":hx=20;hy=18;bx=20;by=24;Tri(20,14,28,6,26,15,s);Tri(20,14,12,7,15,15,s);R(20,11,1,5,"#5a3a1e");for(const[x,y]of[[14,19],[20,19],[26,19],[17,25],[23,25],[20,31]]){E(x,y,4.3,4.3,m);P(X(x-2),Y(y-2),sh(m,1.5))}eye(17,22);eye(21,22);R(19,27,3,1,K);break;
+case"W":hx=20;hy=18;bx=20;by=24;R(11,10,18,24,m);R(11,10,3,24,d);R(14,32,15,2,"#f3e9c6");E(21,16,4,4,s);if(fl.includes("l")){Tri(13,10,16,3,19,10,"#4fae3a");Tri(21,10,25,2,26,10,"#4fae3a")}eye(17,23);eye(23,23);R(19,28,3,1,K);break;
+case"N":hx=20;hy=14;bx=20;by=24;R(13,6,14,29,m);R(15,9,10,9,d);R(15,21,10,11,d);E(24,26,1.4,1.4,"#ffd23f");if(fl.includes("l")){Tri(13,6,17,0,20,6,"#4fae3a");Tri(21,6,25,0,27,6,"#4fae3a")}eye(17,12);eye(21,12);R(18,16,4,1,K);break;
+case"X":hx=20;hy=12;bx=20;by=26;E(20,34,9,3,m);Tri(15,34,20,16,25,34,m);E(20,22,6,2,m);if(fl.includes("P"))E(20,14,5,5,m);if(fl.includes("B")){Tri(15,19,20,4,25,19,m);Ln(22,6,19,13,K)}if(fl.includes("K")){R(14,9,12,9,m);R(19,2,2,7,s);R(16,4,8,2,s)}if(fl.includes("Q")){R(15,10,10,8,m);for(let i=0;i<4;i++)Tri(15+i*3,10,16.5+i*3,3,18+i*3,10,s);E(20,2,1.5,1.5,s)}eye(17,26);eye(21,26);break;
+case"F":hx=11;hy=21;tx=34;ty=22;Tri(29,23,38,13,38,31,s);Tri(15,17,22,9,28,18,s);Tri(17,26,24,33,13,31,sd);E(20,23,11,8,m);E(19,27,8,3,s);eye(10,20);Ln(6,25,10,26,K);if(fl.includes("o")){Ln(33,15,37,19,sl);Ln(37,15,33,19,sl)}break;
+case"K":hx=8;hy=22;tx=36;ty=28;for(let i=14;i>=0;i--){const t=i/14,x=11+t*26,y=25+7*Math.sin(t*7)+t*3,r=5.4-3.8*t;E(x,y,r,r,m);if(i%2)E(x,y+1.5,r*.6,r*.4,s)}if(fl.includes("w")){Tri(18,22,10,8,24,20,s);Tri(26,24,38,10,32,24,s)}Tri(10,16,13,7,15,17,s);E(8,22,6,5,m);E(5,25,4,2,s);eye(6,20);break;
+case"I":hx=12;hy=22;bx=19;by=22;if(fl.includes("d")){E(15,16,9,3,s);E(25,16,9,3,sl);E(20,26,8,6,m);Ln(20,21,20,32,d);E(12,27,3,3,m);eye(10,26)}else{E(15,14,9,3,s);E(25,14,9,3,sl);E(14,19,7,2,s);E(18,22,4,3,m);Ln(21,22,36,22,m,2);for(let x=24;x<36;x+=3)P(X(x),Y(22),d);E(12,22,3,3,m);eye(10,21);Tri(9,19,5,14,10,18,s)}break;
+case"L":hx=9;hy=25;bx=22;by=28;Ln(32,32,38,32,s);E(20,29,12,4,m);E(9,25,4,5,m);Ln(8,21,5,15,m);E(5,15,1.2,1.2,s);E(24,23,6,6,s);E(24,23,3,3,sd);eye(7,24);break;
+case"Y":hx=12;hy=19;bx=22;by=26;E(32,28,2,2,m);R(13,32,5,3,d);R(27,32,5,3,d);E(22,26,10,8,m);E(21,28,6,5,s);E(13,19,8,7,m);if(fl.includes("r")){Tri(7,16,3,3,11,13,m);Tri(15,13,18,2,19,16,m)}else{E(8,13,2.5,2.5,m);E(17,12,2.5,2.5,m)}E(13,28,3,2.5,m);eye(9,18);eye(14,18);E(6,21,1.5,1,K);if(fl.includes("S")){R(15,11,3,1,"#ffd23f");R(16,10,1,3,"#ffd23f")}break;
+case"Z":hx=20;hy=20;bx=20;by=25;E(20,25,11,11,m);for(const[x,y]of[[20,15],[10,27],[30,27],[15,34],[25,34]])E(x,y,2.4,2.4,s);eye(14,23);eye(23,23);R(18,28,4,1,K);break;
+case"G":hx=20;hy=13;bx=20;by=24;if(fl.includes("C")){E(20,24,8,12,m);Ln(17,14,22,22,d);Ln(22,22,18,30,d);eye(17,20);eye(21,20)}else{E(14,29,6,5,m);E(27,29,6,5,m);E(20,24,10,9,m);E(9,24,4,7,m);E(31,24,4,7,m);E(20,13,6,5,m);Ln(18,17,22,24,d);R(17,12,2,2,s);R(22,12,2,2,s);if(fl.includes("x")){E(9,31,3,3,"#c0392b");E(31,31,3,3,"#c0392b")}if(fl.includes("g")){Tri(15,10,17,2,19,10,s);Tri(22,10,24,3,26,10,s)}}break;
+case"A":hx=20;hy=15;bx=20;by=22;for(let i=-3;i<=3;i++){const sx=20+i*3.2,ex=20+i*5.2;Ln(sx,22,ex,32,m,3);E(ex,33+(Math.abs(i)%2),2,1.5,m);P(X(sx+1),Y(27),s);P(X(ex),Y(31),s)}E(20,16,10,9,m);E(15,11,3,2,sh(m,1.5));if(fl.includes("o")){E(26,12,2.5,2.5,s);E(15,19,2,2,s);E(25,19,1.5,1.5,s)}eye(14,17);eye(22,17);P(X(19),Y(21),K);P(X(20),Y(22),K);P(X(21),Y(21),K);break;
+case"E":hx=12;hy=19;bx=24;by=24;Ln(34,24,36,31,m,2);R(15,30,4,7,d);R(29,30,4,7,d);R(19,31,4,6,m);R(33,31,4,6,m);E(24,25,10,8,m);E(17,21,5,6,d);E(12,20,7,7,m);Ln(7,22,5,30,m,3);Ln(5,30,8,33,m,3);Tri(9,26,4,32,11,29,"#f4ecd0");eye(10,18);if(fl.includes("l")&&f>.85){E(24,15,8,4,"#3f8f3a");E(18,17,4,3,"#4fae3a");E(30,17,4,3,"#4fae3a")}break;
+default:E(20,26,9,8,m);eye(16,24);eye(22,24)}
+const A=(c,x,y)=>P(X(x),Y(y),c);
+if(fl.includes("h")){Tri(hx-3,hy-4,hx-5,hy-11,hx-1,hy-5,s);Tri(hx+3,hy-4,hx+5,hy-11,hx+1,hy-5,s)}
+if(fl.includes("a")){for(let a=0;a<16;a++){A("#ffe14d",hx+Math.cos(a/16*6.283)*6,hy-10+Math.sin(a/16*6.283)*2)}}
+if(fl.includes("c")){R(hx-3,hy-9,7,2,"#ffd23f");Tri(hx-3,hy-9,hx-3,hy-13,hx-1,hy-9,"#ffd23f");Tri(hx,hy-9,hx+1,hy-14,hx+2,hy-9,"#ffd23f");Tri(hx+2,hy-9,hx+4,hy-13,hx+4,hy-9,"#ffd23f")}
+if(fl.includes("f")){const fx=tx||hx,fy=tx?ty-3:hy-9;Tri(fx-3,fy+4,fx,fy-6,fx+3,fy+4,"#ff7a1a");Tri(fx-2,fy+4,fx,fy-2,fx+2,fy+4,"#ffd23f");Tri(fx+3,fy+4,fx+5,fy-2,fx+6,fy+4,"#ff7a1a")}
+if(fl.includes("l")&&q.a!="P"&&q.a!="T"&&q.a!="W"&&q.a!="N"){Tri(bx-5,by-6,bx-3,by-13,bx-1,by-6,"#4fae3a");Tri(bx,by-6,bx+2,by-14,bx+4,by-6,"#58c04a");Tri(bx+4,by-6,bx+7,by-11,bx+8,by-6,"#4fae3a")}
+if(fl.includes("e")&&q.a!="R"){for(const[a,b,c2,d2]of[[31,10,27,16],[27,16,31,17],[31,17,27,25]])Ln(a,b,c2,d2,"#ffe14d")}
+if(fl.includes("i")){Tri(bx-6,by-6,bx-4,by-14,bx-2,by-6,"#d6f4ff");Tri(bx-1,by-7,bx+1,by-16,bx+3,by-7,"#aee6ff");Tri(bx+4,by-6,bx+6,by-13,bx+8,by-6,"#d6f4ff")}
+if(fl.includes("m")&&"RFK".includes(q.a)){R(bx-8,by-1,16,2,sl);A("#ffffff",bx-6,by-1);A("#ffffff",bx+6,by-1)}
+if(fl.includes("n")){Ln(hx+8,hy-12,hx+8,hy-5,"#7a3fd0");E(hx+7,hy-5,2,1.5,"#7a3fd0");Ln(hx+8,hy-12,hx+11,hy-10,"#7a3fd0")}
+if(fl.includes("r")&&"QCY".indexOf(q.a)>=0&&q.a!="Y"){Tri(hx-4,hy-5,hx-8,hy-16,hx,hy-6,m);Tri(hx+3,hy-6,hx+8,hy-16,hx+8,hy-4,m)}
+if(fl.includes("k"))for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(g[y][x]===m&&x%2==0)g[y][x]=s;
+const src=g.map(r=>r.slice()),gg=(y,x)=>(src[y]||[])[x];
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){const c=src[y][x];if(c===m||c===s){const up=!gg(y-1,x),lf=!gg(y,x-1),dn=!gg(y+1,x),rt=!gg(y,x+1),dn2=!gg(y+2,x),L=c===m?l:sl,Dk=c===m?d:sd,M2=sh(c,.86);if(up||lf)g[y][x]=L;else if(dn||rt)g[y][x]=Dk;else if(dn2)g[y][x]=M2}}
+const oc=c=>{c=c.length==4?"#"+c[1]+c[1]+c[2]+c[2]+c[3]+c[3]:c;return c===K?K:sh(c,.36)};
+const o=g.map(r=>r.slice());for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(!g[y][x]){const nb=(g[y-1]||[])[x]||(g[y+1]||[])[x]||g[y][x-1]||g[y][x+1];if(nb)o[y][x]=oc(nb)}
+for(let y=35;y<=39;y++)for(let x=4;x<N-4;x++)if(!o[y][x]&&((x-20)/(11*f+1))**2+((y-37)/2)**2<=1)o[y][x]="rgba(0,0,0,0.22)";
+return o}
+const PXC={};
+function pxu(id){if(PXC[id])return PXC[id];const c=document.createElement("canvas");c.width=c.height=40;const x=c.getContext("2d");pixGrid(id).forEach((r,y)=>r.forEach((v,i)=>{if(v){x.fillStyle=v;x.fillRect(i,y,1,1)}}));return PXC[id]=c.toDataURL()}
+
+const NPL=poolOf(["Normal"]);
+const route=(x,y)=>{if(G&&G.inn)return[G.inn==1?"🏫 Acadésia":"🏟️ Ginásio",[],"#b8b8c8"];if(G&&G.isl==-2)return["⛰️ Caverna Normal",NPL,"#6a6a78"];const r=route0(x,y);return(G&&G.isl>=0)?r:[r[0],NPL,r[2]]};
+const nteam=(lvs,sd)=>lvs.map((lv,j)=>{const pl=NPL.filter(k=>SP[k].lm<=lv);return[pl[(sd*5+j*3)%pl.length],lv]});
+TR.forEach(o=>{if(o.k==null&&o.t&&o.t.length)o.t=o.t.map(([k,lv],j)=>{const pl=NPL.filter(q=>SP[q].lm<=lv);return[pl[(o.id*5+j*3)%pl.length],lv]})});
+const repOn=()=>!!(G&&G.rep&&Date.now()<G.rep),repTxt=()=>{if(!repOn())return"";const s=Math.ceil((G.rep-Date.now())/1000);return"🛡️ "+Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+setInterval(()=>{const e=$("rp");if(e)e.textContent=repTxt()},1000);
+function buyRep(){if((G.money||0)<200)hud="Dinheiro insuficiente! 💸";else{G.money-=200;G.rep=Math.max(Date.now(),G.rep||0)+300000;hud="🛡️ Repelente ativo por 5 minutos: nenhum monstro selvagem vai te atacar no mato!"}save();r()}
+function loadCave(keep){M.length=0;TR.length=0;PAL={s:"#a8a8b8",a:"#6a6a78",b:"#62626f",t:"#454552"};GP={x:0,y:0};let s=777;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+for(let y=0;y<30;y++)M[y]=Array(40).fill(12);
+const cv=(x1,y1,x2,y2)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)M[y][x]=2};
+cv(13,19,27,27);cv(19,12,21,19);cv(8,4,32,12);cv(9,13,11,16);cv(29,13,31,16);
+for(let y=1;y<29;y++)for(let x=1;x<39;x++)if(M[y][x]==2){if(Math.sin(x*.7)+Math.sin(y*.6)>1)M[y][x]=3;else if(rnd()<.05)M[y][x]=12}
+for(let y=22;y<=27;y++)for(let x=18;x<=22;x++)M[y][x]=2;for(let y=12;y<=19;y++)for(let x=19;x<=21;x++)M[y][x]=2;
+M[28][20]=13;[[9,5,0],[31,5,1]].forEach(([x,y,i])=>{M[y][x]=(G.beat&&G.beat["c"+i])?2:15;M[y][x+(i?-1:1)]=2;M[y+1][x]=2});
+[["Mariana",20,16,"d",[20,21]],["Tiago",14,8,"r",[22,23]],["Valéria",20,6,"d",[25,26,27]]].forEach(([n,x,y,d,lvs],k)=>{M[y][x]=2;TR.push({id:300+k,n,d,c:["#8a5a3a","#3a7d44","#a02a6a"][k],t:nteam(lvs,300+k),x,y,i:0,al:0})});
+if(!keep){P.x=20;P.y=27}}
+function enterCave(){G.isl=-2;loadCave();G.pos=[P.x,P.y];curR="";hud="⛰️ Você entrou na Caverna Normal!";save();go("world")}
+function leaveCave(){G.isl=-1;loadIsl(-1,1);P.x=MAIN.cvx;P.y=MAIN.cvy+1;G.pos=[P.x,P.y];curR="";hud="Você saiu da caverna.";save();go("world")}
+function chest(){const k="c"+(P.x<20?0:1);if(!G.beat)G.beat={};if(G.beat[k])return;G.beat[k]=1;G.balls+=3;G.money=(G.money||0)+300;M[P.y][P.x]=2;hud="🎁 Baú aberto! +3 Monstro Bolas e +₽300";$("hud").textContent=hud;save()}
+function loadIn(keep){M.length=0;TR.length=0;GP={x:0,y:0};const k=G.inn,I=G.isl>=0?ISL[G.isl]:null,sy=(n,x,y,d,c,say,heal)=>TR.push({id:"n"+TR.length,n,d,c,t:[],x,y,i:0,al:0,say,heal});
+if(k==1){PAL={s:"#d8c8a0",a:"#cbb98c",b:"#c2b080",t:"#8a7a5a"};for(let y=0;y<14;y++){M[y]=[];for(let x=0;x<22;x++)M[y][x]=(y==0||y==13||x==0||x==21)?16:2}
+for(let x=2;x<=20;x+=2)M[0][x]=21;M[13][11]=17;M[8][4]=18;M[6][10]=M[6][11]=M[6][12]=19;for(const[x,y]of[[1,4],[1,5],[20,4],[20,5],[1,9],[20,9]])M[y][x]=20;
+sy("Prof. Kunshu",11,5,"d","#3a4a8a",()=>"Bem-vindo(a) à Acadésia de Lolse, "+G.name+"! Minha turma é a de Kalos. Sua equipe foi curada. Explore as rotas, vença os treinadores e enfrente os líderes de ginásio.",1);
+sy("Aluno",6,9,"r","#d6a03a","A Acadésia tem 10 turmas, uma para cada região clássica, de Kanto a Paldea.");
+sy("Aluna",16,9,"l","#d65a9e","Dizem que o professor Kunshu é mais forte do que parece...");
+sy("Veterano",15,3,"d","#3a8a5a","O ginásio Normal fica a oeste, perto do laboratório. A líder só aceita quem venceu todos os treinadores da ilha.");
+if(!keep){P.x=11;P.y=12}}
+else{const c=I?I.pal.a:"#a8a878",L=I?I.leader:GL;PAL={s:sh(c,1.3),a:sh(c,1.15),b:sh(c,1.05),t:sh(c,.7)};for(let y=0;y<14;y++){M[y]=[];for(let x=0;x<16;x++)M[y][x]=(y==0||y==13||x==0||x==15)?16:2}
+GE=I?TE[I.types[0]]:"⭐";M[13][8]=17;for(let y=4;y<=12;y++)for(let x=7;x<=9;x++)M[y][x]=22;for(let x=6;x<=10;x++)M[3][x]=22;for(const[x,y]of[[3,3],[12,3],[3,8],[12,8],[3,11],[12,11]])M[y][x]=23;M[0][4]=M[0][11]=25;
+TR.push({id:"ld",n:L.n,d:"d",c:"#d4a017",t:[],x:8,y:3,i:0,al:0,ld:1});
+if(!keep){P.x=8;P.y=12}}}
+function enterIn(k){G.inn=k;G.ret=[P.x,P.y+1];loadIn(0);G.pos=[P.x,P.y];curR="";hud=k==1?"🏫 Acadésia de Lolse. Fale com o Prof. Kunshu!":"🏟️ Ginásio! Fale com o líder.";save();go("world")}
+function exitIn(){const r=G.ret||[CX,CY+1];G.inn=0;loadIsl(G.isl==null?-1:G.isl,1);P.x=r[0];P.y=r[1];G.pos=[P.x,P.y];curR="";hud="Você saiu.";save();go("world")}
+function healSt(){G.team.forEach(m=>m.hp=m.mhp);hud="🩺 Sua equipe foi curada!";$("hud").textContent=hud;save()}
+function homeWarp(){G.inn=0;G.isl=-1;loadIsl(-1,1);P.x=CX;P.y=CY+1;G.pos=[P.x,P.y]}
+const SB={url:"",key:"",room:"",me:"",on:0,peers:{},msg:"",last:"",lp:"",cl:null,ch:null};
+try{Object.assign(SB,JSON.parse(localStorage.getItem("mb-sb")||"{}"))}catch(e){}
+const sbKeep=()=>{try{localStorage.setItem("mb-sb",JSON.stringify({url:SB.url,key:SB.key,room:SB.room,me:SB.me}))}catch(e){}};
+const curI=()=>G.isl==null?-1:G.isl,worldSt=()=>({beat:G.beat||{}});
+function mergeW(st){if(!st||!st.beat||!G)return;if(!G.beat)G.beat={};let ch=0;for(const k in st.beat)if(!G.beat[k]){G.beat[k]=1;ch=1}if(ch){try{localStorage.setItem("mb3",JSON.stringify(G))}catch(e){}if(S=="world")r()}}
+async function pushW(){if(!SB.on)return;try{const{data}=await SB.cl.from("worlds").select("state").eq("code",SB.room).maybeSingle();if(data&&data.state)mergeW(data.state);await SB.cl.from("worlds").upsert({code:SB.room,state:worldSt(),updated_at:new Date().toISOString()});SB.ch.send({type:"broadcast",event:"world",payload:worldSt()})}catch(e){SB.msg="Erro ao salvar o mundo: "+(e.message||e)}}
+async function sbConnect(){SB.me=(SB.me||G.name||"Jogador").trim();SB.room=(SB.room||"").trim().toUpperCase();if(!SB.url||!SB.key||!SB.room){SB.msg="Preencha a URL, a chave e o código da sala.";r();return}if(!window.supabase){SB.msg="A biblioteca do Supabase não carregou (rede bloqueada). Hospede o arquivo no seu próprio site.";r();return}
+sbKeep();try{SB.cl=window.supabase.createClient(SB.url,SB.key);const{data,error}=await SB.cl.from("worlds").select("state").eq("code",SB.room).maybeSingle();if(error)throw error;if(data&&data.state)mergeW(data.state);else await SB.cl.from("worlds").upsert({code:SB.room,state:worldSt()});
+SB.ch=SB.cl.channel("mb-"+SB.room,{config:{broadcast:{self:false}}});
+SB.ch.on("broadcast",{event:"pos"},({payload})=>{SB.peers[payload.id]=Object.assign({},payload,{t:Date.now()})}).on("broadcast",{event:"world"},({payload})=>mergeW(payload)).subscribe(st=>{if(st=="SUBSCRIBED"){SB.on=1;SB.msg="✅ Conectado à sala "+SB.room+" como "+SB.me;clearInterval(SB.iv);SB.iv=setInterval(sendPos,400);pushW();if(S=="online")r()}else if(st=="CHANNEL_ERROR"||st=="TIMED_OUT"){SB.on=0;SB.msg="Falha ao conectar no Realtime ("+st+").";if(S=="online")r()}})}catch(e){SB.msg="Erro: "+(e.message||e);r()}}
+function sbOff(){try{clearInterval(SB.iv);if(SB.ch)SB.cl.removeChannel(SB.ch)}catch(e){}SB.on=0;SB.peers={};SB.msg="Desconectado.";r()}
+function sendPos(){if(!SB.on||!G||!G.pos||S!="world")return;const p=[P.x,P.y,curI(),G.inn||0].join();if(p==SB.lp&&Date.now()-(SB.ls||0)<2000)return;SB.lp=p;SB.ls=Date.now();SB.ch.send({type:"broadcast",event:"pos",payload:{id:SB.me,name:G.name,x:P.x,y:P.y,isl:curI(),inn:G.inn||0}})}
+async function cloudSave(){if(!SB.cl){SB.msg="Conecte primeiro.";r();return}try{const{error}=await SB.cl.from("saves").upsert({world:SB.room,player:SB.me,data:G,updated_at:new Date().toISOString()});if(error)throw error;SB.msg="☁️ Jogo salvo na nuvem."}catch(e){SB.msg="Erro: "+(e.message||e)}r()}
+async function cloudLoad(){if(!SB.cl){SB.msg="Conecte primeiro.";r();return}try{const{data,error}=await SB.cl.from("saves").select("data").eq("world",SB.room).eq("player",SB.me).maybeSingle();if(error)throw error;if(!data){SB.msg="Nenhum save na nuvem.";r();return}G=data.data;save();if(G.inn)loadIn(1);else loadIsl(curI(),1);if(G.pos){P.x=G.pos[0];P.y=G.pos[1]}SB.msg="☁️ Save carregado.";go("world")}catch(e){SB.msg="Erro: "+(e.message||e);r()}}
+let GC="#8a8a5c",GE="⭐";
+function dep(i){const bx=G.box||(G.box=[]);if(G.team.length<2)hud="Deixe ao menos 1 monstro na equipe!";else{bx.push(G.team.splice(i,1)[0]);hud="Monstro guardado na Box."}save();r()}
+function wd(i){const bx=G.box||(G.box=[]);if(G.team.length>=6)hud="Equipe cheia (6)! Guarde alguém primeiro.";else{G.team.push(bx.splice(i,1)[0]);hud="Monstro colocado na equipe!"}save();r()}
+function nm(){const v=$("nm").value.trim()||"Aluno";G={name:v,team:[],balls:5,dex:{},beat:{},ch:0};tmp.i++;r()}
+function nk(){const m=mk(tmp.sp,5);m.nick=$("nk").value.trim()||m.nick;G.team=[m];G.money=300;G.dex[tmp.sp]=2;{const s=tmp.sp;G.rv=s=="d001"?["d004","d007"]:s=="d004"?["d001","d007"]:["d001","d004"]}setRv();hud="👀 Dante (leste) e Serafina (oeste) esperam ao lado do laboratório. Chegue perto e toque em 💬 Falar para duelar. Depois de vencidos, eles vão embora.";G.ch=1;G.loc="ilha";P.x=CX;P.y=CY+1;G.pos=[P.x,P.y];save();go("gift")}
+const vis=o=>!(o.k!=null&&G&&G.beat&&G.beat[o.id])&&(o.req==null||!!(G&&G.beat&&G.beat[o.req]));
+function setRv(){if(!G||!G.rv)return;const ev=(s,n)=>{while(n--&&SP[s].evo)s=Array.isArray(SP[s].evo[1])?SP[s].evo[1][0]:SP[s].evo[1];return s};TR.forEach(o=>{if(o.k==null)return;const s=G.rv[o.k],x=o.k?"a1":"d1";o.t=o.st==0?[[s,5]]:o.st==1?[[ev(s,1),14],[x,12]]:[[ev(s,2),24],[x,20]]})}
+function plc(dx,dy){for(let r=0;r<8;r++)for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){const x=CX+dx+i,y=CY+dy+j;if([2,5].includes((M[y]||[])[x])&&!TR.some(o=>o.x==x&&o.y==y))return[x,y]}}
+TR[6].k=0;TR[6].st=0;TR[7].k=1;TR[7].st=0;
+[].forEach(([n,dx,dy,d,c,k,st,req])=>{const[x,y]=plc(dx,dy);TR.push({id:TR.length,n,d,c,t:[],x,y,i:0,al:0,k,st,req})});
+function hit(a,d,mv){const mu=mult(mv.t,d),stab=SP[a.sp].t.includes(mv.t)?1.5:1;const dm=mu?Math.max(1,Math.floor(((2*a.lv/5+2)*mv.p*st(a,SPEC.includes(mv.t)?3:1)/st(d,SPEC.includes(mv.t)?4:2)/50+2)*mu*stab*(.85+Math.random()*.15))):0;d.hp=Math.max(0,d.hp-dm);B.a=d==B.foe?"f":"p";B.log.push(`${a.nick} usou ${mv.n}! ${mu>1?"Super efetivo!":mu==0?"Não afeta...":mu<1?"Pouco efetivo...":""} (-${dm})`)}
+function chk(){const F=B.foe;if(F.hp<=0){B.log.push(`${F.nick} desmaiou!`);gain(lead(),F.lv*10+5);{const mo=B.tr?F.lv*15:F.lv*6;G.money=(G.money||0)+mo;B.log.push("💰 +₽"+mo)}if(B.tr){const t=B.tr;if(++t.i<t.t.length){B.foe=mk(t.t[t.i][0],t.t[t.i][1]);G.dex[B.foe.sp]=G.dex[B.foe.sp]||1;B.new=1;B.log.push(t.n+" enviou "+B.foe.nick+"!");return 0}(G.beat||(G.beat={}))[t.id]=1;G.balls+=2;if(t.b){G.money=(G.money||0)+500;B.log.push("🏅 Insígnia "+t.b+" conquistada! +₽500")}B.log.push("Você venceu "+t.n+"! +2 Monstro Bolas 🔴");if(t.gym){G.badge=1;tmp.end=1;B.log.push("🏅 Insígnia Normal de Lolse conquistada!")}B.over=1;return 1}if(Math.random()<.3){G.balls++;B.log.push("Você achou 1 Monstro Bola!")}B.over=1;return 1}
+if(!G.team.some(m=>m.hp>0)){B.log.push("Sua equipe desmaiou... Você acorda no laboratório.");G.team.forEach(m=>m.hp=m.mhp);homeWarp();B.over=1;return 1}return 0}
+function foeAtk(){const P=lead(),mv=moves(B.foe),v=mv[R(mv.length)];hit(B.foe,P,v);if(P.hp<=0){B.log.push(`${P.nick} desmaiou!`);const n=lead();if(n)B.log.push(`Vai, ${n.nick}!`)}}
+function act(i){const P=lead(),F=B.foe,v=moves(P)[i];for(const x of st(P,5)>=st(F,5)?["p","f"]:["f","p"]){if(x=="p")hit(P,F,v);else foeAtk();if(chk())break}save();r()}
+function ball(){if(B.tr){B.log.push("Não dá para capturar monstros de treinadores!");r();return}if(G.balls<1){B.log.push("Sem Monstro Bolas!");r();return}G.balls--;const F=B.foe;B.log.push("Você lançou uma Monstro Bola! 🔴");const T=SP[F.sp].T||400,rt=T<=350?.7:T<=450?.55:T<=560?.4:.25,ch=Math.min(.95,(1-.6*F.hp/F.mhp)*rt+.05),pk=Math.pow(ch,1/3);let sh=0;while(sh<3&&Math.random()<pk)sh++;B.log.push("A bola balança... "+(sh?"🔴".repeat(sh):"💨"));if(sh==3){B.log.push(`Gotcha! ${F.nick} foi capturado!`);G.dex[F.sp]=2;if(G.team.length<6)G.team.push(F);else{(G.box||(G.box=[])).push(F);B.log.push(F.nick+" foi enviado para a Box! 📦")}B.over=1}else{B.log.push(sh?"Quase! Ele escapou da bola!":"Ele escapou na hora!");foeAtk();chk()}save();r()}
+function run(){if(B.tr){B.log.push("Não dá para fugir de um treinador!");r();return}B.log.push("Você fugiu em segurança!");B.over=1;r()}
+function gain(m,x){B.log.push(`${m.nick} ganhou ${x} XP!`);m.xp+=x;while(m.xp>=m.lv*12){m.xp-=m.lv*12;m.lv++;B.log.push(`${m.nick} subiu para Lv${m.lv}! ⭐`);const e=SP[m.sp].evo;if(e&&m.lv>=e[0]){const o=SP[m.sp].n;m.sp=Array.isArray(e[1])?e[1][R(e[1].length)]:e[1];if(m.nick==o)m.nick=SP[m.sp].n;G.dex[m.sp]=2;B.log.push(`✨ ${o} evoluiu para ${SP[m.sp].n}! ✨`)}const o=m.mhp;m.mhp=st(m,0);m.hp+=m.mhp-o}}
+const ST1=["📖 CAPÍTULO 1\nO Início na Acadésia de Lolse\n\nTudo começa na grandiosa Acadésia de Lolse, na Ilha Central de Aetherium. Hoje começa uma nova jornada acadêmica e de treinamento...","@name","{n} atravessa os portões da instituição acompanhado de dois rivais:\n\n😈 Dante, o garoto competitivo, focado no lado infernal.\n😇 Serafina, a garota estratégica, focada no lado celestial.","Logo na recepção, os três recebem uma permissão especial: escolher seus Monstros Bolso iniciais, um de cada linha elementar clássica (Fogo, Água e Planta), para começar os estudos."];
+const ST2=["🎒 {n} escolheu seu inicial. Dante e Serafina ficaram com os outros dois.\n\nVocê também recebeu 5 Monstro Bolas 🔴 e a Monstrodex 📱.","{n} é integrado à turma de Kalos, regida pelo Professor Kunshu, um professor carismático que orienta os alunos nas tarefas diárias.\n\nMas ele guarda uma responsabilidade misteriosa e pesada: em segredo, é o Campeão Supremo de Lolse, observando de perto o potencial oculto de {n}.","🗺️ CAPÍTULO 2\nRumo ao Primeiro Desafio\n\nCom os iniciais em mãos e a competição acirrada dos rivais, a rotina escolar dá lugar à exploração prática pelas ilhas do arquipélago.\n\nO primeiro grande objetivo: cruzar as águas até a Ilha Urbana, lar do primeiro teste oficial de insígnia. Siga a estrada ao sul até o porto ⛴️!"];
+const ST3=["⛴️ {n} embarca e cruza as águas do arquipélago... Ao longe, os prédios da Ilha Urbana surgem no horizonte!"];
+const ST4=["🏟️ A Batalha do Primeiro Ginásio\n\nChegando à arena da Ilha Urbana, {n} enfrenta o primeiro Líder de Ginásio, especialista no Tipo Normal, que usa monstros versáteis da região, como o pequeno Cap e o veloz Bolin.","O líder testa as estratégias básicas e a sinergia do time de {n}. Dica: use 🔄 Trocar para escolher o monstro certo para cada golpe!"];
+const END=["🏅 A Vitória\n\nCom táticas bem calculadas e aproveitando a versatilidade do seu time, {n} vence o combate de forma emocionante e conquista a primeira insígnia oficial de Lolse!","Assim começa a caminhada rumo à Elite dos Quatro!\n\n(Fim do Capítulo 2. Continua...)"];
+function story(pg,then){tmp.pg=pg;tmp.i=0;tmp.then=then;go("story")}
+function nx(){if(tmp.i<tmp.pg.length-1){tmp.i++;r()}else tmp.then()}
+function newGame(){story(ST1,()=>go("choose"))}
+function begin(){G.team=["d001","d004","d007"].map(k=>mk(k,5));G.team.forEach(m=>G.dex[m.sp]=2);G.ch=1;G.loc="ilha";P.x=CX;P.y=CY+1;G.pos=[P.x,P.y];save();story(ST2,()=>go("world"))}
+function port(){story(ST3,()=>{G.loc="urb";hud="Bem-vindo(a) à Ilha Urbana!";save();go("urb")})}
+function back(){G.loc="ilha";P.x=CX;P.y=PY-1;G.pos=[P.x,P.y];hud="De volta à Ilha Central de Aetherium.";save();go("world")}
+function cure(){G.team.forEach(m=>m.hp=m.mhp);hud="🏥 Equipe curada!";save();r()}
+function cont(){if(tmp.end){tmp.end=0;story(END,()=>go("urb"));return}go(G.loc=="urb"?"urb":"world")}
+function gym(){if(G.badge){hud="Você já tem a insígnia deste ginásio! 🏅";r();return}if(!lead()){hud="Cure sua equipe primeiro!";r();return}story(ST4,()=>{const L=Math.max(6,...G.team.map(m=>m.lv))+1,o={id:"gym1",n:"Líder Tomás",gym:1,i:0,t:[["cp",L],["bo",L+1]]},f=mk("cp",L);G.dex.cp=G.dex.cp||1;G.dex.bo=G.dex.bo||1;B={foe:f,tr:o,over:0,new:1,a:0,sky:"#c9c9d6",log:["Líder Tomás quer batalhar!","Líder Tomás enviou Cap!"]};go("battle")})}
+function swap(){if(G.team.filter(m=>m.hp>0).length<2){B.log.push("Não há outro monstro disponível!");r();return}do{G.team.push(G.team.shift())}while(G.team[0].hp<=0);B.log.push("Vai, "+G.team[0].nick+"!");foeAtk();chk();save();r()}
+if(G&&G.inn)loadIn(1);else if(G&&(G.isl>=0||G.isl==-2))loadIsl(G.isl,1);if(G&&G.pos){P.x=G.pos[0];P.y=G.pos[1]}setRv();
+r();
+</script></body></html>
